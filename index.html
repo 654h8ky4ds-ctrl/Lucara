@@ -211,7 +211,7 @@ footer{
   style="display:none"
   onchange="checkVideo(this)"
 >
-
+<p id="videoStatus" style="display:none; margin-top:15px; color:#6d28d9; font-weight:bold;"></p>
 </div>
 
 
@@ -362,11 +362,19 @@ function checkVideo(input) {
     window.URL.revokeObjectURL(video.src);
 
     if (video.duration > 4) {
-      alert("❌ الفيديو أطول من 4 ثوانٍ. اختاري فيديو مدته 4 ثوانٍ أو أقل.");
-      input.value = "";
-    } else {
-      alert("✅ تم قبول الفيديو. مدته " + video.duration.toFixed(1) + " ثانية.");
-    }
+
+  alert("❌ الفيديو أطول من 4 ثوانٍ");
+  input.value = "";
+
+  document.getElementById("videoStatus").style.display = "none";
+
+} else {
+
+  document.getElementById("videoStatus").style.display = "block";
+  document.getElementById("videoStatus").innerHTML =
+    "✅ تم اختيار الفيديو — جاهز للتحويل إلى GIF";
+
+}
 
   };
 
