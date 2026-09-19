@@ -356,6 +356,7 @@ LUCARA © 2026
 أدوات رقمية بسيطة للجميع
 
 </footer>
+  <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
 <script>
 function checkVideo(input) {
 
@@ -388,6 +389,99 @@ document.getElementById("convertGifBtn").style.display = "inline-block";
 
   video.src = URL.createObjectURL(file);
 }
+async function convertToGif() {
+  const input = document.getElementById("videoInput");
+  const file = input.files[0];
+
+  if (!file) {
+    alert("اختاري فيديو أولاً");
+    return;
+  }
+
+  const result = document.getElementById("gifResult");
+  const button = document.getElementById("convertGifBtn");
+
+  button.disabled = true;
+  button.innerText = "جاري التحويل...";
+
+  const video = document.createElement("video");
+  video.src = URL.createObjectURL(file);
+  video.muted = true;
+  video.playsInline = true;
+
+  await new Promise(resolve => {
+    video.onloadedmetadata = resolve;
+  });
+
+  const maxWidth = 480;
+  const scale = Math.min(1, maxWidth / video.videoWidth);
+  const width = Math.round(video.videoWidth * scale);
+  const height = Math.round(video.videoHeight * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+
+  const gif = new GIF({
+    workers: 2,
+    quality: 10,
+    width: width,
+    height: height,
+    workerScript:
+      "https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.worker.js"
+  });
+
+  const duration = Math.min(video.duration, 4);
+  const fps = 10;
+  const frameDelay = 1000 / fps;
+  const totalFrames = Math.ceil(duration * fps);
+
+  for (let i = 0; i < totalFrames; i++) {
+    video.currentTime = Math.min(i / fps, duration);
+
+    await new Promise(resolve => {
+      video.onseeked = resolve;
+    });
+
+    ctx.drawImage(video, 0, 0, width, height);
+
+    gif.addFrame(ctx, {
+      copy: true,
+      delay: frameDelay
+    });
+  }
+
+  gif.on("finished", function(blob) {
+    const url = URL.createObjectURL(blob);
+
+    result.innerHTML = "";
+
+    const img = document.createElement("img");
+    img.src = url;
+    img.style.maxWidth = "100%";
+    img.style.borderRadius = "15px";
+
+    const download = document.createElement("a");
+    download.href = url;
+    download.download = "lucara.gif";
+    download.innerText = "تحميل GIF";
+    download.style.display = "block";
+    download.style.marginTop = "15px";
+    download.style.color = "#7c3aed";
+    download.style.fontWeight = "bold";
+
+    result.appendChild(img);
+    result.appendChild(download);
+
+    button.disabled = false;
+    button.innerText = "تحويل إلى GIF";
+  });
+
+  gif.render();
+}
+  
 </script>
 </body>
 </html>
