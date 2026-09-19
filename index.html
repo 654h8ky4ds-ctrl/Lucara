@@ -873,7 +873,7 @@ async function uploadFileToLink(file) {
   }
 
   const fileName = Date.now() + "-" + file.name.replace(/\s+/g, "-");
-
+console.log("بدء الرفع إلى Supabase:", fileName, file.size, file.type);
 const { data, error } = await db.storage
     .from("lucara-files")
     .upload(fileName, file);
