@@ -252,9 +252,19 @@ footer{
 قلل حجم الصور لتسهيل رفعها وإرسالها.
 </p>
 
-<button>
+<button onclick="document.getElementById('compressImageInput').click()">
 استخدام الأداة
 </button>
+
+<input
+  type="file"
+  id="compressImageInput"
+  accept="image/jpeg,image/png,image/webp"
+  style="display:none"
+  onchange="compressImage(this)"
+>
+
+<div id="compressResult" style="margin-top:15px;"></div>
 
 </div>
 
@@ -490,7 +500,67 @@ async function convertToGif() {
 
   gif.render();
 }
-  
+async function compressImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const result = document.getElementById("compressResult");
+  result.innerHTML = "⏳ جاري ضغط الصورة...";
+
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+
+  img.onload = function () {
+    const canvas = document.createElement("canvas");
+
+    let width = img.width;
+    let height = img.height;
+
+    const maxWidth = 1600;
+
+    if (width > maxWidth) {
+      height = Math.round(height * (maxWidth / width));
+      width = maxWidth;
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, width, height);
+
+    canvas.toBlob(function(blob) {
+      if (!blob) {
+        result.innerHTML = "❌ تعذر ضغط الصورة";
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+
+      result.innerHTML = "";
+
+      const preview = document.createElement("img");
+      preview.src = url;
+      preview.style.maxWidth = "100%";
+      preview.style.borderRadius = "15px";
+
+      const download = document.createElement("a");
+      download.href = url;
+      download.download = "lucara-compressed.jpg";
+      download.innerText = "تحميل الصورة المضغوطة";
+      download.style.display = "block";
+      download.style.marginTop = "15px";
+      download.style.color = "#7c3aed";
+      download.style.fontWeight = "bold";
+
+      result.appendChild(preview);
+      result.appendChild(download);
+
+      URL.revokeObjectURL(img.src);
+
+    }, "image/jpeg", 0.7);
+  };
+}  
 </script>
 </body>
 </html>
