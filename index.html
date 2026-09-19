@@ -212,6 +212,14 @@ footer{
   onchange="checkVideo(this)"
 >
 <p id="videoStatus" style="display:none; margin-top:15px; color:#6d28d9; font-weight:bold;"></p>
+<button
+  id="convertGifBtn"
+  onclick="convertToGif()"
+  style="display:none; margin-top:12px;">
+  تحويل إلى GIF
+</button>
+
+<div id="gifResult" style="margin-top:15px;"></div>
 </div>
 
 
@@ -367,13 +375,13 @@ function checkVideo(input) {
   input.value = "";
 
   document.getElementById("videoStatus").style.display = "none";
-
+document.getElementById("convertGifBtn").style.display = "none";
 } else {
 
   document.getElementById("videoStatus").style.display = "block";
   document.getElementById("videoStatus").innerHTML =
     "✅ تم اختيار الفيديو — جاهز للتحويل إلى GIF";
-
+document.getElementById("convertGifBtn").style.display = "inline-block";
 }
 
   };
