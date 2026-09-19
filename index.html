@@ -200,9 +200,17 @@ footer{
 حوّل فيديو مدته حتى 4 ثوانٍ إلى صورة متحركة GIF.
 </p>
 
-<button>
+<button onclick="document.getElementById('videoInput').click()">
 استخدام الأداة
 </button>
+
+<input
+  type="file"
+  id="videoInput"
+  accept="video/*"
+  style="display:none"
+  onchange="checkVideo(this)"
+>
 
 </div>
 
@@ -340,6 +348,30 @@ LUCARA © 2026
 أدوات رقمية بسيطة للجميع
 
 </footer>
+<script>
+function checkVideo(input) {
 
+  const file = input.files[0];
+  if (!file) return;
+
+  const video = document.createElement("video");
+  video.preload = "metadata";
+
+  video.onloadedmetadata = function() {
+
+    window.URL.revokeObjectURL(video.src);
+
+    if (video.duration > 4) {
+      alert("❌ الفيديو أطول من 4 ثوانٍ. اختاري فيديو مدته 4 ثوانٍ أو أقل.");
+      input.value = "";
+    } else {
+      alert("✅ تم قبول الفيديو. مدته " + video.duration.toFixed(1) + " ثانية.");
+    }
+
+  };
+
+  video.src = URL.createObjectURL(file);
+}
+</script>
 </body>
 </html>
