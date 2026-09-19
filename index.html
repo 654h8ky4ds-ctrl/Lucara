@@ -897,7 +897,15 @@ async function uploadFileToLink(file) {
 
   result.innerHTML = "⏳ جاري رفع الملف...";
 
-  const url = await uploadFileToLink(file);
+let url;
+
+try {
+  url = await uploadFileToLink(file);
+} catch (error) {
+  console.error(error);
+  result.innerHTML = "❌ خطأ: " + error.message;
+  return;
+}
 
   if (!url) {
     result.innerHTML = "❌ تعذر إنشاء الرابط";
