@@ -344,9 +344,24 @@ footer{
 حوّل أي رابط أو نص إلى QR Code خلال ثوانٍ.
 </p>
 
-<button>
+<button onclick="showQRTool()">
 استخدام الأداة
 </button>
+
+<div id="qrTool" style="display:none; margin-top:15px;">
+  <input
+    type="text"
+    id="qrText"
+    placeholder="اكتبي النص أو الرابط هنا"
+    style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"
+  >
+
+  <button onclick="generateQR()" style="margin-top:10px;">
+    إنشاء QR
+  </button>
+
+  <div id="qrResult" style="margin-top:15px;"></div>
+</div>
 
 </div>
 
@@ -752,6 +767,32 @@ function loadPDFImage(src) {
 
     img.src = src;
   });
+}    
+function showQRTool() {
+  document.getElementById("qrTool").style.display = "block";
+}
+
+function generateQR() {
+  const text = document.getElementById("qrText").value.trim();
+  const result = document.getElementById("qrResult");
+
+  if (!text) {
+    alert("اكتبي رابط أو نص أولاً");
+    return;
+  }
+
+  result.innerHTML = "";
+
+  const img = document.createElement("img");
+  img.src =
+    "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" +
+    encodeURIComponent(text);
+
+  img.style.maxWidth = "250px";
+  img.style.width = "100%";
+  img.style.borderRadius = "10px";
+
+  result.appendChild(img);
 }    
 </script>
 </body>
