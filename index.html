@@ -429,10 +429,8 @@ async function convertToGif() {
     quality: 10,
     width: width,
     height: height,
-    workerScript:
-      "https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.worker.js"
-  });
-
+    workerScript: "gif.worker.js"
+});
   const duration = Math.min(video.duration, 4);
   const fps = 10;
   const frameDelay = 1000 / fps;
