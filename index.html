@@ -439,7 +439,7 @@ LUCARA © 2026
   <script>
   const SUPABASE_URL = "https://nswxyqgrhjnpoiwnldgd.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zd3h5cWdyaGpucG9pdW5sZGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4NDAxMzUsImV4cCI6MjEwNTQxNjEzNX0.LMv2quAccinWkVWAIfWnt-RfnKnrGm9Ss_vj2TNdreA";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);  
+const lucaraSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 function checkVideo(input) {
 
   const file = input.files[0];
@@ -873,7 +873,7 @@ async function uploadFileToLink(file) {
 
   const fileName = Date.now() + "-" + file.name.replace(/\s+/g, "-");
 
-  const { data, error } = await supabaseClient.storage
+const { data, error } = await lucaraSupabase.storage
     .from("lucara-files")
     .upload(fileName, file);
 
@@ -883,7 +883,7 @@ async function uploadFileToLink(file) {
     return;
   }
 
-  const { data: publicData } = supabaseClient.storage
+const { data: publicData } = lucaraSupabase.storage
     .from("lucara-files")
     .getPublicUrl(fileName);
 
