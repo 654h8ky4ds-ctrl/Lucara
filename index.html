@@ -439,19 +439,30 @@ async function convertToGif() {
   const totalFrames = Math.ceil(duration * fps);
 
   for (let i = 0; i < totalFrames; i++) {
-    video.currentTime = Math.min(i / fps, duration);
 
-    await new Promise(resolve => {
-      video.onseeked = resolve;
-    });
+  const targetTime = Math.min(i / fps, Math.max(0, duration - 0.01));
 
-    ctx.drawImage(video, 0, 0, width, height);
+  if (Math.abs(video.currentTime - targetTime) > 0.001) {
+    await new Promise((resolve) => {
+      const done = () => {
+        video.removeEventListener("seeked", done);
+        resolve();
+      };
 
-    gif.addFrame(ctx, {
-      copy: true,
-      delay: frameDelay
+      video.addEventListener("seeked", done);
+      video.currentTime = targetTime;
+
+      setTimeout(done, 500);
     });
   }
+
+  ctx.drawImage(video, 0, 0, width, height);
+
+  gif.addFrame(ctx, {
+    copy: true,
+    delay: frameDelay
+  });
+}
 
   gif.on("finished", function(blob) {
     const url = URL.createObjectURL(blob);
