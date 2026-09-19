@@ -235,9 +235,18 @@ footer{
 ارفع ملفك واحصل على رابط تستطيع مشاركته بسهولة.
 </p>
 
-<button>
+<button onclick="document.getElementById('linkFileInput').click()">
 استخدام الأداة
 </button>
+
+<input
+  type="file"
+  id="linkFileInput"
+  style="display:none"
+  onchange="createFileLink(this)"
+>
+
+<div id="fileLinkResult" style="margin-top:15px;"></div>
 
 </div>
 
@@ -879,7 +888,33 @@ async function uploadFileToLink(file) {
     .getPublicUrl(fileName);
 
   return publicData.publicUrl;
-}    
+}   
+    async function createFileLink(input) {
+  const file = input.files[0];
+  const result = document.getElementById("fileLinkResult");
+
+  if (!file) return;
+
+  result.innerHTML = "⏳ جاري رفع الملف...";
+
+  const url = await uploadFileToLink(file);
+
+  if (!url) {
+    result.innerHTML = "❌ تعذر إنشاء الرابط";
+    return;
+  }
+
+  result.innerHTML = `
+    <p>✅ تم إنشاء الرابط</p>
+    <a href="${url}" target="_blank">فتح الملف</a>
+    <br><br>
+    <button onclick="navigator.clipboard.writeText('${url}')">
+      نسخ الرابط
+    </button>
+  `;
+
+  input.value = "";
+}
 </script>
 </body>
 </html>
