@@ -279,9 +279,31 @@ footer{
 حوّل الصور بين JPG وPNG وWEBP.
 </p>
 
-<button>
+<button onclick="document.getElementById('convertImageInput').click()">
 استخدام الأداة
 </button>
+
+<input
+  type="file"
+  id="convertImageInput"
+  accept="image/jpeg,image/png,image/webp"
+  style="display:none"
+  onchange="prepareImageConvert(this)"
+>
+
+<div id="convertImageOptions" style="display:none; margin-top:15px;">
+  <select id="imageFormat">
+    <option value="image/jpeg">JPG</option>
+    <option value="image/png">PNG</option>
+    <option value="image/webp">WEBP</option>
+  </select>
+
+  <button onclick="convertImage()" style="margin-top:10px;">
+    تحويل الصورة
+  </button>
+</div>
+
+<div id="convertImageResult" style="margin-top:15px;"></div>
 
 </div>
 
@@ -559,6 +581,82 @@ async function compressImage(input) {
       URL.revokeObjectURL(img.src);
 
     }, "image/jpeg", 0.7);
+  };
+}  
+function prepareImageConvert(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  document.getElementById("convertImageOptions").style.display = "block";
+  document.getElementById("convertImageResult").innerHTML =
+    "✅ تم اختيار الصورة — اختاري الصيغة ثم اضغطي تحويل الصورة";
+}
+
+function convertImage() {
+  const input = document.getElementById("convertImageInput");
+  const file = input.files[0];
+
+  if (!file) {
+    alert("اختاري صورة أولاً");
+    return;
+  }
+
+  const format = document.getElementById("imageFormat").value;
+  const result = document.getElementById("convertImageResult");
+
+  result.innerHTML = "⏳ جاري تحويل الصورة...";
+
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+
+  img.onload = function () {
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    const ctx = canvas.getContext("2d");
+
+    if (format === "image/jpeg") {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    ctx.drawImage(img, 0, 0);
+
+    canvas.toBlob(function (blob) {
+      const url = URL.createObjectURL(blob);
+
+      let extension = "jpg";
+
+      if (format === "image/png") {
+        extension = "png";
+      }
+
+      if (format === "image/webp") {
+        extension = "webp";
+      }
+
+      result.innerHTML = "";
+
+      const preview = document.createElement("img");
+      preview.src = url;
+      preview.style.maxWidth = "100%";
+      preview.style.borderRadius = "15px";
+
+      const download = document.createElement("a");
+      download.href = url;
+      download.download = "lucara." + extension;
+      download.innerText = "تحميل الصورة";
+      download.style.display = "block";
+      download.style.marginTop = "15px";
+      download.style.color = "#7c3aed";
+      download.style.fontWeight = "bold";
+
+      result.appendChild(preview);
+      result.appendChild(download);
+
+      URL.revokeObjectURL(img.src);
+    }, format, 0.92);
   };
 }  
 </script>
