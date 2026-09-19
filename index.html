@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LUCARA | أدوات إلكترونية سريعة</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  background:#f7f6fb;
+  color:#18181b;
+}
+
+/* HEADER */
+
+header{
+  background:linear-gradient(135deg,#4c1d95,#7c3aed,#a855f7);
+  color:white;
+  padding:60px 20px 55px;
+  text-align:center;
+}
+
+.logo{
+  font-size:48px;
+  font-weight:800;
+  letter-spacing:3px;
+  margin:0;
+}
+
+header p{
+  font-size:17px;
+  margin-top:14px;
+  opacity:.92;
+}
+
+/* MAIN */
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  padding:45px 20px;
+}
+
+.intro{
+  text-align:center;
+  margin-bottom:35px;
+}
+
+.intro h2{
+  font-size:30px;
+  margin-bottom:10px;
+}
+
+.intro p{
+  color:#777;
+  font-size:16px;
+}
+
+/* TOOLS */
+
+.tools{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+
+.tool{
+  background:white;
+  padding:30px 22px;
+  border-radius:22px;
+  text-align:center;
+  box-shadow:0 8px 25px rgba(0,0,0,.06);
+  border:1px solid #eeeaf7;
+  transition:.2s;
+}
+
+.tool:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 30px rgba(0,0,0,.09);
+}
+
+.icon{
+  font-size:44px;
+  margin-bottom:14px;
+}
+
+.tool h3{
+  font-size:20px;
+  margin:8px 0;
+}
+
+.tool p{
+  color:#777;
+  line-height:1.7;
+  font-size:14px;
+  min-height:48px;
+}
+
+button{
+  background:linear-gradient(135deg,#6d28d9,#9333ea);
+  color:white;
+  border:0;
+  padding:12px 23px;
+  border-radius:13px;
+  font-size:15px;
+  cursor:pointer;
+  margin-top:8px;
+}
+
+button:hover{
+  opacity:.9;
+}
+
+/* BADGE */
+
+.badge{
+  display:inline-block;
+  background:#f1e9ff;
+  color:#6d28d9;
+  font-size:12px;
+  padding:5px 10px;
+  border-radius:20px;
+  margin-bottom:5px;
+}
+
+/* FOOTER */
+
+footer{
+  text-align:center;
+  padding:35px 20px;
+  color:#999;
+  font-size:13px;
+}
+
+@media(max-width:600px){
+
+  .logo{
+    font-size:39px;
+  }
+
+  header{
+    padding:50px 20px;
+  }
+
+  .intro h2{
+    font-size:26px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<h1 class="logo">LUCARA</h1>
+
+<p>
+أدوات إلكترونية بسيطة، سريعة ومجانية
+</p>
+
+</header>
+
+
+<main class="container">
+
+<section class="intro">
+
+<h2>كل أدواتك في مكان واحد</h2>
+
+<p>
+اختر الأداة التي تحتاجها وابدأ مباشرة
+</p>
+
+</section>
+
+
+<section class="tools">
+
+
+<div class="tool">
+
+<div class="badge">قريبًا</div>
+
+<div class="icon">🎞️</div>
+
+<h3>فيديو إلى GIF</h3>
+
+<p>
+حوّل فيديو مدته حتى 4 ثوانٍ إلى صورة متحركة GIF.
+</p>
+
+<button>
+استخدام الأداة
+</button>
+
+</div>
+
+
+<div class="tool">
+
+<div class="badge">قريبًا</div>
+
+<div class="icon">🔗</div>
+
+<h3>ملف إلى رابط</h3>
+
+<p>
+ارفع ملفك واحصل على رابط تستطيع مشاركته بسهولة.
+</p>
+
+<button>
+استخدام الأداة
+</button>
+
+</div>
+
+
+<div class="tool">
+
+<div class="icon">🗜️</div>
+
+<h3>ضغط الصور</h3>
+
+<p>
+قلل حجم الصور لتسهيل رفعها وإرسالها.
+</p>
+
+<button>
+استخدام الأداة
+</button>
+
+</div>
+
+
+<div class="tool">
+
+<div class="icon">🔄</div>
+
+<h3>تحويل الصور</h3>
+
+<p>
+حوّل الصور بين JPG وPNG وWEBP.
+</p>
+
+<button>
+استخدام الأداة
+</button>
+
+</div>
+
+
+<div class="tool">
+
+<div class="icon">📄</div>
+
+<h3>صور إلى PDF</h3>
+
+<p>
+اجمع عدة صور داخل ملف PDF واحد.
+</p>
+
+<button>
+استخدام الأداة
+</button>
+
+</div>
+
+
+<div class="tool">
+
+<div class="icon">▦</div>
+
+<h3>إنشاء QR</h3>
+
+<p>
+حوّل أي رابط أو نص إلى QR Code خلال ثوانٍ.
+</p>
+
+<button>
+استخدام الأداة
+</button>
+
+</div>
+
+
+<div class="tool">
+
+<div class="icon">📐</div>
+
+<h3>تغيير حجم الصورة</h3>
+
+<p>
+غيّر عرض وارتفاع الصورة بالمقاس الذي تحتاجه.
+</p>
+
+<button>
+استخدام الأداة
+</button>
+
+</div>
+
+
+<div class="tool">
+
+<div class="icon">✂️</div>
+
+<h3>قص الفيديو</h3>
+
+<p>
+قص جزء محدد من الفيديو بسرعة وسهولة.
+</p>
+
+<button>
+استخدام الأداة
+</button>
+
+</div>
+
+
+</section>
+
+</main>
+
+
+<footer>
+
+LUCARA © 2026
+<br>
+أدوات رقمية بسيطة للجميع
+
+</footer>
+
+</body>
+</html>
