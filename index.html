@@ -425,7 +425,7 @@ async function convertToGif() {
   const ctx = canvas.getContext("2d");
 
   const gif = new GIF({
-    workers: 2,
+    workers: 1,
     quality: 10,
     width: width,
     height: height,
