@@ -318,10 +318,19 @@ footer{
 اجمع عدة صور داخل ملف PDF واحد.
 </p>
 
-<button>
+<button onclick="document.getElementById('pdfImagesInput').click()">
 استخدام الأداة
 </button>
+<input
+  type="file"
+  id="pdfImagesInput"
+  accept="image/*"
+  multiple
+  style="display:none"
+  onchange="preparePDF(this)"
+>
 
+<div id="pdfResult" style="margin-top:15px;"></div>
 </div>
 
 
@@ -389,7 +398,8 @@ LUCARA © 2026
 
 </footer>
   <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <script>
 function checkVideo(input) {
 
   const file = input.files[0];
@@ -659,6 +669,90 @@ function convertImage() {
     }, format, 0.92);
   };
 }  
+function preparePDF(input) {
+  const files = input.files;
+  const result = document.getElementById("pdfResult");
+
+  if (!files.length) return;
+
+  result.innerHTML =
+    "✅ تم اختيار " + files.length +
+    " صورة <br><button onclick='createPDF()' style='margin-top:10px;'>إنشاء PDF</button>";
+}
+
+async function createPDF() {
+  const files = document.getElementById("pdfImagesInput").files;
+  const result = document.getElementById("pdfResult");
+
+  if (!files.length) {
+    alert("اختاري صورة واحدة على الأقل");
+    return;
+  }
+
+  result.innerHTML = "⏳ جاري إنشاء PDF...";
+
+  const { jsPDF } = window.jspdf;
+  let pdf = null;
+
+  for (let i = 0; i < files.length; i++) {
+    const data = await fileToDataURL(files[i]);
+
+    const img = await loadPDFImage(data);
+
+    const orientation =
+      img.width > img.height ? "landscape" : "portrait";
+
+    if (i === 0) {
+      pdf = new jsPDF({
+        orientation: orientation,
+        unit: "px",
+        format: [img.width, img.height]
+      });
+    } else {
+      pdf.addPage(
+        [img.width, img.height],
+        orientation
+      );
+    }
+
+    pdf.addImage(
+      data,
+      "JPEG",
+      0,
+      0,
+      img.width,
+      img.height
+    );
+  }
+
+  pdf.save("lucara-images.pdf");
+
+  result.innerHTML = "✅ تم إنشاء ملف PDF وتحميله";
+}
+
+function fileToDataURL(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+
+    reader.onload = function () {
+      resolve(reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadPDFImage(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+
+    img.onload = function () {
+      resolve(img);
+    };
+
+    img.src = src;
+  });
+}    
 </script>
 </body>
 </html>
