@@ -349,13 +349,26 @@ footer{
 </button>
 
 <div id="qrTool" style="display:none; margin-top:15px;">
+  
+<select id="qrType" onchange="changeQRType()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px;">
+  <option value="text">🔗 رابط أو نص</option>
+  <option value="location">📍 موقع</option>
+  <option value="whatsapp">💬 واتساب</option>
+  <option value="phone">📞 رقم جوال</option>
+  <option value="wifi">📶 Wi-Fi</option>
+</select>   
   <input
     type="text"
     id="qrText"
     placeholder="اكتبي النص أو الرابط هنا"
     style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"
   >
-
+<input
+  type="password"
+  id="wifiPassword"
+  placeholder="كلمة مرور Wi-Fi"
+  style="display:none; width:100%; padding:12px; margin-top:10px;"
+>
   <button onclick="generateQR()" style="margin-top:10px;">
     إنشاء QR
   </button>
@@ -773,27 +786,73 @@ function showQRTool() {
 }
 
 function generateQR() {
+  const type = document.getElementById("qrType").value;
   const text = document.getElementById("qrText").value.trim();
   const result = document.getElementById("qrResult");
 
   if (!text) {
-    alert("اكتبي رابط أو نص أولاً");
+    alert("اكتبي البيانات أولاً");
     return;
   }
+
+  let qrData = text;
+
+  if (type === "location") {
+    qrData = text;
+  }
+
+  if (type === "whatsapp") {
+    const number = text.replace(/\D/g, "");
+    qrData = "https://wa.me/" + number;
+  }
+
+  if (type === "phone") {
+    qrData = "tel:" + text.replace(/\s/g, "");
+  }
+
+  if (type === "wifi") {
+  const password = document.getElementById("wifiPassword").value;
+  qrData = "WIFI:T:WPA;S:" + text + ";P:" + password + ";;";
+}
 
   result.innerHTML = "";
 
   const img = document.createElement("img");
   img.src =
     "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" +
-    encodeURIComponent(text);
+    encodeURIComponent(qrData);
 
   img.style.maxWidth = "250px";
   img.style.width = "100%";
   img.style.borderRadius = "10px";
 
   result.appendChild(img);
-}    
+} 
+ function changeQRType() {
+  const type = document.getElementById("qrType").value;
+  const input = document.getElementById("qrText");
+const wifiPassword = document.getElementById("wifiPassword");
+wifiPassword.style.display = type === "wifi" ? "block" : "none";
+  if (type === "text") {
+    input.placeholder = "اكتبي النص أو الرابط هنا";
+  }
+
+  if (type === "location") {
+    input.placeholder = "الصقي رابط الموقع من الخرائط هنا";
+  }
+
+  if (type === "whatsapp") {
+    input.placeholder = "رقم واتساب مثال: 9665XXXXXXXX";
+  }
+
+  if (type === "phone") {
+    input.placeholder = "اكتبي رقم الجوال";
+  }
+
+  if (type === "wifi") {
+    input.placeholder = "اسم الشبكة | كلمة المرور";
+  }
+}   
 </script>
 </body>
 </html>
