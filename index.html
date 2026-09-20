@@ -889,7 +889,22 @@ const { data: publicData } = db.storage
     .from("lucara-files")
     .getPublicUrl(fileName);
 
-  return publicData.publicUrl;
+const code = Math.random().toString(36).substring(2, 8);
+
+const { error: linkError } = await db
+  .from("short_links")
+  .insert({
+    code: code,
+    file_url: publicData.publicUrl
+  });
+
+if (linkError) {
+  console.error(linkError);
+  alert("تعذر إنشاء الرابط القصير: " + linkError.message);
+  return;
+}
+
+return window.location.origin + window.location.pathname + "?s=" + code;
 }   
     async function createFileLink(input) {
   const file = input.files[0];
@@ -925,6 +940,27 @@ try {
 
   input.value = "";
 }
+    async function openShortLink() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("s");
+
+  if (!code) return;
+
+  const { data, error } = await db
+    .from("short_links")
+    .select("file_url")
+    .eq("code", code)
+    .single();
+
+  if (error || !data) {
+    alert("الرابط غير موجود أو غير صالح");
+    return;
+  }
+
+  window.location.href = data.file_url;
+}
+
+openShortLink();
 </script>
 </body>
 </html>
