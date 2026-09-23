@@ -1345,14 +1345,42 @@ download.onclick = async function (e) {
       "تحريك الصورة";
   }
 }   
- function showVideoPayment() {
+async function showVideoPayment() {
   const fileInput = document.getElementById("aiVideoInput");
 
   if (!fileInput || !fileInput.files || !fileInput.files[0]) {
     alert("اختاري صورة أولاً");
     return;
   }
+const file = fileInput.files[0];
+const prompt = document.getElementById("aiVideoPrompt")?.value?.trim() || "";
 
+const fileName =
+  "ai-video/" +
+  Date.now() +
+  "-" +
+  Math.random().toString(36).substring(2) +
+  "-" +
+  file.name;
+
+const { error: uploadError } = await db.storage
+  .from("lucara-files")
+  .upload(fileName, file);
+
+if (uploadError) {
+  console.error(uploadError);
+  alert("تعذر رفع الصورة، حاولي مرة أخرى");
+  return;
+}
+
+const { data: publicData } = db.storage
+  .from("lucara-files")
+  .getPublicUrl(fileName);
+
+const imageUrl = publicData.publicUrl;
+
+sessionStorage.setItem("lucara_pending_image_url", imageUrl);
+sessionStorage.setItem("lucara_pending_prompt", prompt);
   const paymentBox = document.getElementById("videoPaymentBox");
   paymentBox.style.display = "block";
 
