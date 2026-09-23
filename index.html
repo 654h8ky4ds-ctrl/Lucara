@@ -1263,7 +1263,54 @@ download.innerText = "تحميل الفيديو";
     download.style.fontWeight =
       "bold";
 
+download.onclick = async function (e) {
+  e.preventDefault();
 
+  const oldText = download.innerText;
+  download.innerText = "جاري تحميل الفيديو...";
+
+  try {
+    const response = await fetch(
+      SUPABASE_URL + "/functions/v1/lucara-image-to-video",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY
+        },
+        body: JSON.stringify({
+          action: "download",
+          video_url: videoUrl
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message);
+    }
+
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = "lucara-video.mp4";
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+
+    download.innerText = oldText;
+
+  } catch (error) {
+    console.error(error);
+    download.innerText = "❌ تعذر تحميل الفيديو";
+  }
+};
     result.appendChild(video);
 
     result.appendChild(download);
