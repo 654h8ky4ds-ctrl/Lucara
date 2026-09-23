@@ -1244,14 +1244,9 @@ async function createAIVideo() {
     const download =
       document.createElement("a");
 
-    download.href =
-      videoUrl;
-
-    download.target =
-      "_blank";
-
-    download.innerText =
-      "فتح وتحميل الفيديو";
+    download.href = videoUrl;
+download.download = "lucara-video.mp4";
+download.innerText = "تحميل الفيديو";
 
     download.style.display =
       "block";
