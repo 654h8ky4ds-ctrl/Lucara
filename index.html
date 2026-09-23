@@ -1346,10 +1346,10 @@ download.onclick = async function (e) {
   }
 }   
 async function showVideoPayment() {
-  const fileInput = document.getElementById("aiVideoInput");
+const fileInput = document.getElementById("aiImageInput");
 
   if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-    alert("اختاري صورة أولاً");
+    alert("اختر صورة أولاً");
     return;
   }
 const file = fileInput.files[0];
