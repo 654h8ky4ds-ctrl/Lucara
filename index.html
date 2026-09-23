@@ -1380,6 +1380,18 @@ download.onclick = async function (e) {
   paymentBox.dataset.loaded = "true";
   paymentBox.scrollIntoView({ behavior: "smooth" });
 }   
+ const moyasarParams = new URLSearchParams(window.location.search);
+const moyasarPaymentId = moyasarParams.get("id");
+
+if (moyasarPaymentId) {
+  sessionStorage.setItem("lucara_payment_id", moyasarPaymentId);
+
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
+}   
 </script>
 </body>
 </html>
