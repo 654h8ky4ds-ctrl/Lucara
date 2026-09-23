@@ -1420,6 +1420,208 @@ if (moyasarPaymentId) {
     window.location.pathname
   );
 }   
+async function resumePaidVideo() {
+  const paymentId = sessionStorage.getItem("lucara_payment_id");
+  const imageUrl = sessionStorage.getItem("lucara_pending_image_url");
+  const prompt = sessionStorage.getItem("lucara_pending_prompt") || "";
+
+  if (!paymentId || !imageUrl) {
+    return;
+  }
+
+  const result = document.getElementById("aiVideoResult");
+
+  if (result) {
+    result.innerHTML = "⏳ تم استلام الدفع، جاري بدء إنشاء الفيديو...";
+  }
+
+  try {
+    const response = await fetch(
+      SUPABASE_URL + "/functions/v1/lucara-image-to-video",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY
+        },
+        body: JSON.stringify({
+          image_url: imageUrl,
+          prompt: prompt,
+          payment_id: paymentId
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "تعذر بدء إنشاء الفيديو");
+    }
+
+    sessionStorage.removeItem("lucara_payment_id");
+    sessionStorage.removeItem("lucara_pending_image_url");
+    sessionStorage.removeItem("lucara_pending_prompt");
+
+    if (result) {
+      result.innerHTML = "⏳ جاري إنشاء الفيديو بالذكاء الاصطناعي...";
+    }
+
+    console.log("Video generation started:", data);
+const statusUrl =
+  data.status_url ||
+  data.statusUrl;
+
+const responseUrl =
+  data.response_url ||
+  data.responseUrl;
+
+if (!statusUrl || !responseUrl) {
+  throw new Error("تعذر العثور على رابط متابعة الفيديو");
+}
+
+let completed = false;
+
+while (!completed) {
+  await new Promise(resolve => setTimeout(resolve, 3000));
+
+  const statusResponse = await fetch(
+    SUPABASE_URL + "/functions/v1/lucara-image-to-video",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY
+      },
+      body: JSON.stringify({
+        action: "status",
+        status_url: statusUrl,
+        response_url: responseUrl
+      })
+    }
+  );
+
+  const statusData = await statusResponse.json();
+
+  if (!statusResponse.ok) {
+    throw new Error(
+      statusData.error || "تعذر متابعة إنشاء الفيديو"
+    );
+  }
+
+  if (statusData.status === "COMPLETED") {
+    completed = true;
+
+    const completedData =
+      statusData.result ||
+      statusData;
+
+    const videoUrl =
+      completedData?.video?.url ||
+      completedData?.video_url ||
+      completedData?.url ||
+      completedData?.data?.video?.url;
+
+    if (!videoUrl) {
+      console.log("نتيجة الفيديو:", completedData);
+      throw new Error(
+        "تم إنشاء الفيديو ولكن تعذر العثور على رابطه"
+      );
+    }
+
+    result.innerHTML = "";
+
+    const video = document.createElement("video");
+    video.src = videoUrl;
+    video.controls = true;
+    video.playsInline = true;
+    video.style.width = "100%";
+    video.style.borderRadius = "15px";
+
+    const download = document.createElement("a");
+    download.href = "#";
+    download.innerText = "تحميل الفيديو";
+
+    download.style.display = "block";
+    download.style.marginTop = "15px";
+    download.style.color = "#7c3aed";
+    download.style.fontWeight = "bold";
+
+    download.onclick = async function (e) {
+      e.preventDefault();
+
+      const oldText = download.innerText;
+      download.innerText = "جاري تحميل الفيديو...";
+
+      try {
+        const downloadResponse = await fetch(
+          SUPABASE_URL + "/functions/v1/lucara-image-to-video",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": SUPABASE_KEY,
+              "Authorization": "Bearer " + SUPABASE_KEY
+            },
+            body: JSON.stringify({
+              action: "download",
+              video_url: videoUrl
+            })
+          }
+        );
+
+        if (!downloadResponse.ok) {
+          throw new Error(
+            await downloadResponse.text()
+          );
+        }
+
+        const blob = await downloadResponse.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = "lucara-video.mp4";
+
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        setTimeout(
+          () => URL.revokeObjectURL(blobUrl),
+          5000
+        );
+
+        download.innerText = oldText;
+
+      } catch (error) {
+        console.error(error);
+        download.innerText = "❌ تعذر تحميل الفيديو";
+      }
+    };
+
+    result.appendChild(video);
+    result.appendChild(download);
+
+  } else if (
+    statusData.status === "FAILED" ||
+    statusData.status === "ERROR"
+  ) {
+    throw new Error("فشل إنشاء الفيديو");
+  }
+}
+  } catch (error) {
+    console.error(error);
+
+    if (result) {
+      result.innerHTML =
+        "❌ تعذر بدء إنشاء الفيديو: " + error.message;
+    }
+  }
+}
+
+resumePaidVideo();    
 </script>
 </body>
 </html>
