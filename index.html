@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>LUCARA | أدوات إلكترونية سريعة</title>
+<link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.14.0/moyasar.css">
 
+<script src="https://polyfill.io/v3/polyfill.min.js?features=fetch"></script>
+<script src="https://cdn.moyasar.com/mpf/1.14.0/moyasar.js"></script>
 <style>
 
 *{
@@ -435,12 +438,18 @@ footer{
 
     <button
       id="aiVideoBtn"
-      onclick="createAIVideo()"
+onclick="showVideoPayment()"
       style="margin-top:10px;"
     >
       تحريك الصورة
     </button>
+<div id="videoPaymentBox" style="display:none; margin-top:18px;">
+  <p style="font-weight:bold; color:#6d28d9;">
+    قيمة إنشاء الفيديو: 5 ريال
+  </p>
 
+  <div class="mysr-form"></div>
+</div>
   </div>
 
   <div id="aiVideoResult" style="margin-top:15px;"></div>
@@ -1335,6 +1344,41 @@ download.onclick = async function (e) {
     button.innerText =
       "تحريك الصورة";
   }
+}   
+ function showVideoPayment() {
+  const fileInput = document.getElementById("aiVideoInput");
+
+  if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+    alert("اختاري صورة أولاً");
+    return;
+  }
+
+  const paymentBox = document.getElementById("videoPaymentBox");
+  paymentBox.style.display = "block";
+
+  if (paymentBox.dataset.loaded === "true") {
+    paymentBox.scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  Moyasar.init({
+    element: ".mysr-form",
+
+    amount: 500,
+    currency: "SAR",
+
+    description: "LUCARA - إنشاء فيديو بالذكاء الاصطناعي",
+
+    publishable_api_key: "pk_test_****************************************",
+
+    callback_url: "https://654h8ky4ds-ctrl.github.io/Lucara/",
+
+    methods: ["creditcard"],
+    supported_networks: ["mada", "visa", "mastercard"]
+  });
+
+  paymentBox.dataset.loaded = "true";
+  paymentBox.scrollIntoView({ behavior: "smooth" });
 }   
 </script>
 </body>
