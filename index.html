@@ -1244,7 +1244,10 @@ async function createAIVideo() {
     const download =
       document.createElement("a");
 
-    download.href = videoUrl;
+   download.href =
+  SUPABASE_URL +
+  "/functions/v1/lucara-image-to-video?video_url=" +
+  encodeURIComponent(videoUrl);
 download.download = "lucara-video.mp4";
 download.innerText = "تحميل الفيديو";
 
