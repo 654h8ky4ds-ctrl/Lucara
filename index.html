@@ -403,7 +403,49 @@ footer{
 </button>
 
 </div>
+<div class="tool">
 
+  <div class="icon">🎬</div>
+
+  <h3>تحريك الصورة بالذكاء الاصطناعي</h3>
+
+  <p>
+    حوّل صورتك إلى فيديو متحرك بالذكاء الاصطناعي لمدة 4 ثوانٍ.
+  </p>
+
+  <button onclick="document.getElementById('aiImageInput').click()">
+    اختيار صورة
+  </button>
+
+  <input
+    type="file"
+    id="aiImageInput"
+    accept="image/*"
+    style="display:none"
+    onchange="prepareAIImage(this)"
+  >
+
+  <div id="aiVideoOptions" style="display:none; margin-top:15px;">
+
+    <textarea
+      id="aiVideoPrompt"
+      placeholder="اكتبي وصف الحركة (اختياري)"
+      style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; min-height:80px;"
+    ></textarea>
+
+    <button
+      id="aiVideoBtn"
+      onclick="createAIVideo()"
+      style="margin-top:10px;"
+    >
+      تحريك الصورة
+    </button>
+
+  </div>
+
+  <div id="aiVideoResult" style="margin-top:15px;"></div>
+
+</div>
 
 
 
@@ -947,6 +989,308 @@ try {
 }
 
 openShortLink();
+ function prepareAIImage(input) {
+  const file = input.files[0];
+
+  if (!file) return;
+
+  document.getElementById("aiVideoOptions").style.display = "block";
+
+  document.getElementById("aiVideoResult").innerHTML =
+    "✅ تم اختيار الصورة — اكتبي وصف الحركة أو اضغطي تحريك الصورة مباشرة";
+}
+
+
+async function createAIVideo() {
+
+  const input = document.getElementById("aiImageInput");
+  const file = input.files[0];
+
+  const prompt =
+    document.getElementById("aiVideoPrompt").value.trim();
+
+  const result =
+    document.getElementById("aiVideoResult");
+
+  const button =
+    document.getElementById("aiVideoBtn");
+
+  if (!file) {
+    alert("اختاري صورة أولاً");
+    return;
+  }
+
+  button.disabled = true;
+  button.innerText = "جاري رفع الصورة...";
+
+  try {
+
+    // رفع الصورة إلى Supabase Storage
+    const extension =
+      file.name.split(".").pop() || "jpg";
+
+    const fileName =
+      "ai-" +
+      Date.now() +
+      "-" +
+      Math.random().toString(36).substring(2, 8) +
+      "." +
+      extension;
+
+    const { error: uploadError } =
+      await db.storage
+        .from("lucara-files")
+        .upload(fileName, file, {
+          contentType: file.type,
+          upsert: false
+        });
+
+    if (uploadError) {
+      throw new Error(
+        "تعذر رفع الصورة: " +
+        uploadError.message
+      );
+    }
+
+    const { data: publicData } =
+      db.storage
+        .from("lucara-files")
+        .getPublicUrl(fileName);
+
+    const imageUrl =
+      publicData.publicUrl;
+
+    result.innerHTML =
+      "🎬 تم رفع الصورة — جاري بدء إنشاء الفيديو...";
+
+    button.innerText =
+      "جاري إنشاء الفيديو...";
+
+
+    // إرسال الصورة إلى Edge Function
+    const functionUrl =
+      SUPABASE_URL +
+      "/functions/v1/lucara-image-to-video";
+
+    const startResponse =
+      await fetch(functionUrl, {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "apikey":
+            SUPABASE_KEY,
+
+          "Authorization":
+            "Bearer " +
+            SUPABASE_KEY
+        },
+
+        body: JSON.stringify({
+          image_url: imageUrl,
+          prompt: prompt
+        })
+      });
+
+
+    const startData =
+      await startResponse.json();
+
+
+    if (!startResponse.ok) {
+      throw new Error(
+        startData.error ||
+        "تعذر بدء إنشاء الفيديو"
+      );
+    }
+
+
+    if (
+      !startData.status_url ||
+      !startData.response_url
+    ) {
+      throw new Error(
+        "لم يتم استلام بيانات معالجة الفيديو"
+      );
+    }
+
+
+    result.innerHTML =
+      "⏳ جاري تحريك الصورة بالذكاء الاصطناعي... قد يستغرق ذلك عدة دقائق.";
+
+
+    // متابعة حالة الفيديو
+    let completedData = null;
+
+    for (let attempt = 0; attempt < 120; attempt++) {
+
+      await new Promise(
+        resolve =>
+          setTimeout(resolve, 5000)
+      );
+
+
+      const statusResponse =
+        await fetch(functionUrl, {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            "apikey":
+              SUPABASE_KEY,
+
+            "Authorization":
+              "Bearer " +
+              SUPABASE_KEY
+          },
+
+          body: JSON.stringify({
+            action: "status",
+
+            status_url:
+              startData.status_url,
+
+            response_url:
+              startData.response_url
+          })
+        });
+
+
+      const statusData =
+        await statusResponse.json();
+
+
+      if (!statusResponse.ok) {
+        throw new Error(
+          statusData.error ||
+          "تعذر متابعة معالجة الفيديو"
+        );
+      }
+
+
+      if (statusData.status === "COMPLETED") {
+
+        completedData =
+          statusData.result;
+
+        break;
+      }
+
+
+      if (
+        statusData.status === "FAILED"
+      ) {
+        throw new Error(
+          "فشل إنشاء الفيديو"
+        );
+      }
+    }
+
+
+    if (!completedData) {
+      throw new Error(
+        "استغرق إنشاء الفيديو وقتًا أطول من المتوقع"
+      );
+    }
+
+
+    // البحث عن رابط الفيديو في استجابة fal.ai
+    const videoUrl =
+      completedData?.video?.url ||
+      completedData?.video_url ||
+      completedData?.url ||
+      completedData?.data?.video?.url;
+
+
+    if (!videoUrl) {
+
+      console.log(
+        "نتيجة الفيديو:",
+        completedData
+      );
+
+      throw new Error(
+        "تم إنشاء الفيديو ولكن تعذر العثور على رابطه"
+      );
+    }
+
+
+    result.innerHTML = "";
+
+
+    const video =
+      document.createElement("video");
+
+    video.src =
+      videoUrl;
+
+    video.controls =
+      true;
+
+    video.playsInline =
+      true;
+
+    video.style.width =
+      "100%";
+
+    video.style.borderRadius =
+      "15px";
+
+
+    const download =
+      document.createElement("a");
+
+    download.href =
+      videoUrl;
+
+    download.target =
+      "_blank";
+
+    download.innerText =
+      "فتح وتحميل الفيديو";
+
+    download.style.display =
+      "block";
+
+    download.style.marginTop =
+      "15px";
+
+    download.style.color =
+      "#7c3aed";
+
+    download.style.fontWeight =
+      "bold";
+
+
+    result.appendChild(video);
+
+    result.appendChild(download);
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    result.innerHTML =
+      "❌ " +
+      (
+        error.message ||
+        "حدث خطأ أثناء إنشاء الفيديو"
+      );
+
+  } finally {
+
+    button.disabled =
+      false;
+
+    button.innerText =
+      "تحريك الصورة";
+  }
+}   
 </script>
 </body>
 </html>
