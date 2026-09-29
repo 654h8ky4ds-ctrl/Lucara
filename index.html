@@ -1371,7 +1371,7 @@ download.onclick = async function (e) {
   }
 
   try {
-    const { data: codeRow, error: codeError } = await supabaseClient
+    const { data: codeRow, error: codeError } = await db
       .from("lucara_codes")
       .select("id, code, used")
       .eq("code", cleanCode)
@@ -1406,7 +1406,7 @@ download.onclick = async function (e) {
       "." +
       ext;
 
-    const { error: uploadError } = await supabaseClient.storage
+    const { error: uploadError } = await db.storage
       .from(BUCKET)
       .upload(fileName, file, {
         cacheControl: "3600",
@@ -1418,7 +1418,7 @@ download.onclick = async function (e) {
       throw uploadError;
     }
 
-    const { data: publicData } = supabaseClient.storage
+    const { data: publicData } = db.storage
       .from(BUCKET)
       .getPublicUrl(fileName);
 
