@@ -1402,6 +1402,11 @@ sessionStorage.setItem("lucara_pending_prompt", prompt);
     callback_url: "https://654h8ky4ds-ctrl.github.io/Lucara/",
 
 methods: ["creditcard", "applepay"],
+    apple_pay: {
+  label: "LUCARA",
+  country: "SA",
+  validate_merchant_url: "https://api.moyasar.com/v1/applepay/initiate"
+},
     supported_networks: ["mada", "visa", "mastercard"]
   });
 
