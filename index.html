@@ -1417,29 +1417,7 @@ async function enterLucaraCode() {
   }
 
   try {
-    const { data: codeRow, error: codeError } = await db
-      .from("lucara_codes")
-      .select("id, code, used")
-      .eq("code", cleanCode)
-      .eq("used", false)
-      .maybeSingle();
-
-    if (codeError) {
-      throw codeError;
-    }
-
-    if (!codeRow) {
-      if (result) {
-        result.innerHTML =
-          "❌ الكود غير صحيح أو تم استخدامه مسبقًا.<br><br>" +
-          '<a href="https://wa.me/966554765405?text=' +
-          encodeURIComponent(
-            "السلام عليكم، أرغب بشراء كود استخدام لأداة تحريك الصور في LUCARA بقيمة 5 ريال."
-          ) +
-          '" target="_blank" rel="noopener noreferrer">💬 شراء كود جديد عبر واتساب — 5 ريال</a>';
-      }
-      return;
-    }
+    
 
     if (result) {
       result.innerHTML = "⏳ تم قبول الكود، جاري رفع الصورة...";
