@@ -429,7 +429,13 @@ footer{
   >
 
   <div id="aiVideoOptions" style="display:none; margin-top:15px;">
-
+<div style="margin:12px 0;">
+  <label for="aiVideoDuration">مدة الفيديو:</label>
+  <select id="aiVideoDuration">
+    <option value="4" selected>4 ثوانٍ</option>
+    <option value="8">8 ثوانٍ</option>
+  </select>
+</div>
     <textarea
       id="aiVideoPrompt"
       placeholder="اكتبي وصف الحركة (اختياري)"
@@ -1403,7 +1409,8 @@ async function enterLucaraCode() {
   const fileInput = document.getElementById("aiImageInput");
   const promptInput = document.getElementById("aiVideoPrompt");
   const result = document.getElementById("aiVideoResult");
-
+const duration = Number(document.getElementById("aiVideoDuration")?.value || 4);
+sessionStorage.setItem("lucara_pending_duration", String(duration));
   const code = prompt("أدخلي كود الاستخدام:");
 
   if (!code || !code.trim()) {
@@ -1472,7 +1479,7 @@ async function enterLucaraCode() {
  async function resumePaidVideo() {
 const accessCode = sessionStorage.getItem("lucara_access_code");
   const imageUrl = sessionStorage.getItem("lucara_pending_image_url");
-  const prompt = sessionStorage.getItem("lucara_pending_prompt") || "";
+const duration = Number(sessionStorage.getItem("lucara_pending_duration") || document.getElementById("aiVideoDuration")?.value || 4);
 
 if (!accessCode || !imageUrl) {
     return;
@@ -1497,6 +1504,7 @@ if (!accessCode || !imageUrl) {
         body: JSON.stringify({
   image_url: imageUrl,
   prompt: prompt,
+     duration: duration,     
   access_code: accessCode
 })
       }
