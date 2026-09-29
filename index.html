@@ -1345,92 +1345,107 @@ download.onclick = async function (e) {
       "تحريك الصورة";
   }
 }   
-async function showVideoPayment() {
-const fileInput = document.getElementById("aiImageInput");
+ async function showVideoPayment() {
+  const fileInput = document.getElementById("aiImageInput");
+  const promptInput = document.getElementById("aiPrompt");
+  const result = document.getElementById("aiVideoResult");
 
   if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-    alert("اختر صورة أولاً");
-    return;
-  }
-const file = fileInput.files[0];
-const prompt = document.getElementById("aiVideoPrompt")?.value?.trim() || "";
-
-const fileName =
-  "ai-video/" +
-  Date.now() +
-  "-" +
-  Math.random().toString(36).substring(2) +
-  "-" +
-  file.name;
-
-const { error: uploadError } = await db.storage
-  .from("lucara-files")
-  .upload(fileName, file);
-
-if (uploadError) {
-  console.error(uploadError);
-  alert("تعذر رفع الصورة، حاولي مرة أخرى");
-  return;
-}
-
-const { data: publicData } = db.storage
-  .from("lucara-files")
-  .getPublicUrl(fileName);
-
-const imageUrl = publicData.publicUrl;
-
-sessionStorage.setItem("lucara_pending_image_url", imageUrl);
-sessionStorage.setItem("lucara_pending_prompt", prompt);
-  const paymentBox = document.getElementById("videoPaymentBox");
-  paymentBox.style.display = "block";
-
-  if (paymentBox.dataset.loaded === "true") {
-    paymentBox.scrollIntoView({ behavior: "smooth" });
+    alert("اختار صورة أولاً");
     return;
   }
 
-  Moyasar.init({
-    element: ".mysr-form",
-
-amount: 500,
-    currency: "SAR",
-
-    description: "LUCARA - إنشاء فيديو بالذكاء الاصطناعي",
-
-    publishable_api_key: "pk_test_YB2cxEvVZiskh65aPwWeAKvRijVfmVq5zaKdR9zB",
-
-    callback_url: "https://654h8ky4ds-ctrl.github.io/Lucara/",
-
-methods: ["creditcard", "applepay"],
-    apple_pay: {
-  label: "LUCARA",
-  country: "SA",
-  validate_merchant_url: "https://api.moyasar.com/v1/applepay/initiate"
-},
-    supported_networks: ["mada", "visa", "mastercard"]
-  });
-
-  paymentBox.dataset.loaded = "true";
-  paymentBox.scrollIntoView({ behavior: "smooth" });
-}   
- const moyasarParams = new URLSearchParams(window.location.search);
-const moyasarPaymentId = moyasarParams.get("id");
-
-if (moyasarPaymentId) {
-  sessionStorage.setItem("lucara_payment_id", moyasarPaymentId);
-
-  window.history.replaceState(
-    {},
-    document.title,
-    window.location.pathname
+  const code = prompt(
+    "💜 استخدام أداة تحريك الصورة بـ 5 ريال\n\n" +
+    "أدخل كود الاستخدام الذي حصلتِ عليه بعد التواصل عبر واتساب:"
   );
-}   
-async function resumePaidVideo() {
-  const paymentId = sessionStorage.getItem("lucara_payment_id");
+
+  if (!code || !code.trim()) {
+    return;
+  }
+
+  const cleanCode = code.trim().toUpperCase();
+
+  if (result) {
+    result.innerHTML = "⏳ جاري التحقق من كود الاستخدام...";
+  }
+
+  try {
+    const { data: codeRow, error: codeError } = await supabaseClient
+      .from("lucara_codes")
+      .select("id, code, used")
+      .eq("code", cleanCode)
+      .eq("used", false)
+      .maybeSingle();
+
+    if (codeError) {
+      throw codeError;
+    }
+
+    if (!codeRow) {
+      if (result) {
+        result.innerHTML =
+          "❌ الكود غير صحيح أو تم استخدامه مسبقًا.<br><br>" +
+          '<a href="https://wa.me/message/YDDRSORVOHQBD1" target="_blank" rel="noopener noreferrer">💬 شراء كود جديد عبر واتساب — 5 ريال</a>';
+      }
+      return;
+    }
+
+    if (result) {
+      result.innerHTML = "⏳ تم قبول الكود، جاري رفع الصورة...";
+    }
+
+    const file = fileInput.files[0];
+    const promptText = promptInput ? promptInput.value.trim() : "";
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const fileName =
+      "ai/" +
+      Date.now() +
+      "-" +
+      Math.random().toString(36).slice(2) +
+      "." +
+      ext;
+
+    const { error: uploadError } = await supabaseClient.storage
+      .from(BUCKET)
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type || "image/jpeg"
+      });
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data: publicData } = supabaseClient.storage
+      .from(BUCKET)
+      .getPublicUrl(fileName);
+
+    const imageUrl = publicData.publicUrl;
+
+    sessionStorage.setItem("lucara_access_code", cleanCode);
+    sessionStorage.setItem("lucara_pending_image_url", imageUrl);
+    sessionStorage.setItem("lucara_pending_prompt", promptText);
+
+    await resumePaidVideo();
+
+  } catch (err) {
+    console.error(err);
+
+    if (result) {
+      result.innerHTML =
+        "❌ تعذر التحقق من الكود.<br>" +
+        (err?.message || "حاول مرة أخرى");
+    }
+  }
+}
+ async function resumePaidVideo() {
+const accessCode = sessionStorage.getItem("lucara_access_code");
   const imageUrl = sessionStorage.getItem("lucara_pending_image_url");
   const prompt = sessionStorage.getItem("lucara_pending_prompt") || "";
 
-  if (!paymentId || !imageUrl) {
+if (!accessCode || !imageUrl) {
     return;
   }
 
@@ -1451,10 +1466,10 @@ async function resumePaidVideo() {
           "Authorization": "Bearer " + SUPABASE_KEY
         },
         body: JSON.stringify({
-          image_url: imageUrl,
-          prompt: prompt,
-          payment_id: paymentId
-        })
+  image_url: imageUrl,
+  prompt: prompt,
+  access_code: accessCode
+})
       }
     );
 
@@ -1464,7 +1479,7 @@ async function resumePaidVideo() {
       throw new Error(data.error || "تعذر بدء إنشاء الفيديو");
     }
 
-    sessionStorage.removeItem("lucara_payment_id");
+sessionStorage.removeItem("lucara_access_code");
     sessionStorage.removeItem("lucara_pending_image_url");
     sessionStorage.removeItem("lucara_pending_prompt");
 
