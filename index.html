@@ -1347,18 +1347,64 @@ download.onclick = async function (e) {
 }   
  async function showVideoPayment() {
   const fileInput = document.getElementById("aiImageInput");
-  const promptInput = document.getElementById("aiPrompt");
   const result = document.getElementById("aiVideoResult");
 
   if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-    alert("اختار صورة أولاً");
+    alert("اختاري صورة أولاً");
     return;
   }
 
-  const code = prompt(
-    "💜 استخدام أداة تحريك الصورة بـ 5 ريال\n\n" +
-    "أدخل كود الاستخدام الذي حصلتِ عليه بعد التواصل عبر واتساب:"
-  );
+  if (result) {
+    result.innerHTML = `
+      <div style="
+        padding:20px;
+        border:1px solid #e5e5e5;
+        border-radius:16px;
+        margin-top:15px;
+        text-align:center;
+      ">
+        <div style="font-size:18px;font-weight:bold;margin-bottom:8px;">
+          💜 قيمة تحريك الصورة: 5 ريال
+        </div>
+
+        <div style="margin-bottom:15px;">
+          للحصول على كود الاستخدام، تواصلي عبر واتساب
+        </div>
+
+        <a
+          href="https://wa.me/966554765405?text=${encodeURIComponent(
+            "السلام عليكم، أرغب بشراء كود استخدام لأداة تحريك الصور في LUCARA بقيمة 5 ريال."
+          )}"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="
+            display:block;
+            background:#25D366;
+            color:white;
+            padding:13px;
+            border-radius:12px;
+            text-decoration:none;
+            font-weight:bold;
+            margin-bottom:12px;
+          "
+        >
+          💬 شراء كود عبر واتساب — 5 ريال
+        </a>
+
+        <button onclick="enterLucaraCode()" style="width:100%;">
+          🔑 إدخال كود الاستخدام
+        </button>
+      </div>
+    `;
+  }
+}
+
+async function enterLucaraCode() {
+  const fileInput = document.getElementById("aiImageInput");
+  const promptInput = document.getElementById("aiVideoPrompt");
+  const result = document.getElementById("aiVideoResult");
+
+  const code = prompt("أدخلي كود الاستخدام:");
 
   if (!code || !code.trim()) {
     return;
@@ -1386,7 +1432,11 @@ download.onclick = async function (e) {
       if (result) {
         result.innerHTML =
           "❌ الكود غير صحيح أو تم استخدامه مسبقًا.<br><br>" +
-          '<a href="https://wa.me/966554765405?text=السلام%20عليكم،%20أرغب%20بشراء%20كود%20استخدام%20لأداة%20تحريك%20الصور%20في%20LUCARA%20بقيمة%205%20ريال." target="_blank" rel="noopener noreferrer">💬 شراء كود جديد عبر واتساب — 5 ريال</a>';
+          '<a href="https://wa.me/966554765405?text=' +
+          encodeURIComponent(
+            "السلام عليكم، أرغب بشراء كود استخدام لأداة تحريك الصور في LUCARA بقيمة 5 ريال."
+          ) +
+          '" target="_blank" rel="noopener noreferrer">💬 شراء كود جديد عبر واتساب — 5 ريال</a>';
       }
       return;
     }
@@ -1398,8 +1448,9 @@ download.onclick = async function (e) {
     const file = fileInput.files[0];
     const promptText = promptInput ? promptInput.value.trim() : "";
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+
     const fileName =
-      "ai/" +
+      "ai-" +
       Date.now() +
       "-" +
       Math.random().toString(36).slice(2) +
@@ -1407,7 +1458,7 @@ download.onclick = async function (e) {
       ext;
 
     const { error: uploadError } = await db.storage
-      .from(BUCKET)
+      .from("lucara-files")
       .upload(fileName, file, {
         cacheControl: "3600",
         upsert: false,
@@ -1419,7 +1470,7 @@ download.onclick = async function (e) {
     }
 
     const { data: publicData } = db.storage
-      .from(BUCKET)
+      .from("lucara-files")
       .getPublicUrl(fileName);
 
     const imageUrl = publicData.publicUrl;
@@ -1436,7 +1487,7 @@ download.onclick = async function (e) {
     if (result) {
       result.innerHTML =
         "❌ تعذر التحقق من الكود.<br>" +
-        (err?.message || "حاول مرة أخرى");
+        (err?.message || "حاولي مرة أخرى");
     }
   }
 }
