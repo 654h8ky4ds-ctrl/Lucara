@@ -1890,14 +1890,7 @@ function cvSection(title, value) {
   `;
 }
 
-function escapeCV(text) {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
-}
-
 function printCV() {
-
   const cv = document.getElementById("lucaraCV");
 
   if (!cv) {
@@ -1907,45 +1900,94 @@ function printCV() {
 
   const printWindow = window.open("", "_blank");
 
+  if (!printWindow) {
+    alert("تعذر فتح السيرة. تأكدي من السماح بالنوافذ المنبثقة.");
+    return;
+  }
+
+  printWindow.document.open();
+
   printWindow.document.write(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
       <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
       <title>السيرة الذاتية</title>
 
       <style>
+        @page {
+          size: A4;
+          margin: 12mm;
+        }
+
+        * {
+          box-sizing: border-box;
+        }
+
         body {
-          font-family: Arial, sans-serif;
-          background:white;
-          margin:0;
-          padding:30px;
+          font-family: Arial, Tahoma, sans-serif;
+          background: #ffffff;
+          color: #222;
+          margin: 0;
+          padding: 0;
+          direction: rtl;
         }
 
         #lucaraCV {
-          max-width:800px;
-          margin:auto;
+          width: 100%;
+          max-width: 190mm;
+          margin: 0 auto;
+          background: white;
+          box-shadow: none !important;
+          border: none !important;
+        }
+
+        .save-note {
+          text-align: center;
+          background: #f3e8ff;
+          color: #5b21b6;
+          padding: 12px;
+          margin-bottom: 15px;
+          border-radius: 10px;
+          font-size: 14px;
+        }
+
+        .print-button {
+          display: block;
+          width: 100%;
+          max-width: 300px;
+          margin: 20px auto;
+          padding: 14px;
+          border: 0;
+          border-radius: 12px;
+          background: #6d28d9;
+          color: white;
+          font-size: 16px;
+          font-weight: bold;
         }
 
         @media print {
-          body {
-            padding:0;
+          .save-note,
+          .print-button {
+            display: none !important;
           }
         }
       </style>
-
     </head>
 
     <body>
 
+      <div class="save-note">
+        اضغطي الزر بالأسفل، ثم اختاري حفظ كـ PDF.
+      </div>
+
       ${cv.outerHTML}
 
-      <script>
-        window.onload = function() {
-          window.print();
-        };
-      <\/script>
+      <button class="print-button" onclick="window.print()">
+        حفظ السيرة الذاتية PDF
+      </button>
 
     </body>
     </html>
