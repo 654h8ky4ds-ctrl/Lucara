@@ -1761,6 +1761,198 @@ while (!completed) {
 }
 
 resumePaidVideo();    
+    function showCVBuilder() {
+  const builder = document.getElementById("cvBuilder");
+
+  if (!builder) return;
+
+  if (builder.style.display === "none" || builder.style.display === "") {
+    builder.style.display = "block";
+  } else {
+    builder.style.display = "none";
+  }
+}
+
+function generateCV() {
+
+  const name = document.getElementById("cvName").value.trim();
+  const job = document.getElementById("cvJob").value.trim();
+  const phone = document.getElementById("cvPhone").value.trim();
+  const email = document.getElementById("cvEmail").value.trim();
+  const city = document.getElementById("cvCity").value.trim();
+  const summary = document.getElementById("cvSummary").value.trim();
+  const education = document.getElementById("cvEducation").value.trim();
+  const experience = document.getElementById("cvExperience").value.trim();
+  const skills = document.getElementById("cvSkills").value.trim();
+  const courses = document.getElementById("cvCourses").value.trim();
+  const languages = document.getElementById("cvLanguages").value.trim();
+
+  if (!name) {
+    alert("اكتبي الاسم الكامل أولاً");
+    return;
+  }
+
+  const result = document.getElementById("cvResult");
+
+  result.innerHTML = `
+    <div id="lucaraCV" style="
+      background:#ffffff;
+      color:#222;
+      padding:30px 25px;
+      border-radius:16px;
+      border:1px solid #e5e5e5;
+      text-align:right;
+      line-height:1.8;
+    ">
+
+      <div style="
+        border-bottom:3px solid #7c3aed;
+        padding-bottom:18px;
+        margin-bottom:20px;
+      ">
+        <h1 style="
+          margin:0;
+          font-size:28px;
+          color:#4c1d95;
+        ">
+          ${escapeCV(name)}
+        </h1>
+
+        ${job ? `
+          <div style="
+            font-size:17px;
+            margin-top:5px;
+            font-weight:bold;
+          ">
+            ${escapeCV(job)}
+          </div>
+        ` : ""}
+
+        <div style="
+          margin-top:12px;
+          font-size:13px;
+          color:#555;
+        ">
+          ${phone ? `📱 ${escapeCV(phone)} &nbsp; ` : ""}
+          ${email ? `✉️ ${escapeCV(email)} &nbsp; ` : ""}
+          ${city ? `📍 ${escapeCV(city)}` : ""}
+        </div>
+      </div>
+
+      ${cvSection("النبذة المهنية", summary)}
+      ${cvSection("التعليم", education)}
+      ${cvSection("الخبرات العملية", experience)}
+      ${cvSection("المهارات", skills)}
+      ${cvSection("الدورات والشهادات", courses)}
+      ${cvSection("اللغات", languages)}
+
+    </div>
+
+    <button
+      onclick="printCV()"
+      style="width:100%; margin-top:15px;"
+    >
+      تحميل / حفظ السيرة PDF
+    </button>
+  `;
+
+  result.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+function cvSection(title, value) {
+
+  if (!value) return "";
+
+  return `
+    <div style="margin-bottom:20px;">
+
+      <h2 style="
+        color:#6d28d9;
+        font-size:18px;
+        margin:0 0 7px;
+        border-bottom:1px solid #eee;
+        padding-bottom:5px;
+      ">
+        ${title}
+      </h2>
+
+      <div style="
+        white-space:pre-line;
+        font-size:14px;
+      ">
+        ${escapeCV(value)}
+      </div>
+
+    </div>
+  `;
+}
+
+function escapeCV(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function printCV() {
+
+  const cv = document.getElementById("lucaraCV");
+
+  if (!cv) {
+    alert("أنشئي السيرة الذاتية أولاً");
+    return;
+  }
+
+  const printWindow = window.open("", "_blank");
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+      <meta charset="UTF-8">
+
+      <title>السيرة الذاتية</title>
+
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background:white;
+          margin:0;
+          padding:30px;
+        }
+
+        #lucaraCV {
+          max-width:800px;
+          margin:auto;
+        }
+
+        @media print {
+          body {
+            padding:0;
+          }
+        }
+      </style>
+
+    </head>
+
+    <body>
+
+      ${cv.outerHTML}
+
+      <script>
+        window.onload = function() {
+          window.print();
+        };
+      <\/script>
+
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+}
 </script>
 </body>
 </html>
