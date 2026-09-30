@@ -465,7 +465,19 @@ onclick="showVideoPayment()"
   </button>
 
   <div id="cvBuilder" style="display:none; margin-top:20px; text-align:right;">
+<div style="margin-bottom:15px;">
+  <label style="display:block; margin-bottom:7px; font-weight:bold;">
+    نوع السيرة الذاتية
+  </label>
 
+  <select id="cvTemplate"
+    style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+    
+    <option value="ats">احترافي ATS — مناسب للتقديم على الشركات</option>
+    <option value="modern">حديث — تصميم أنيق</option>
+
+  </select>
+</div>
     <input
       type="text"
       id="cvName"
@@ -1775,7 +1787,7 @@ resumePaidVideo();
 }
 
 function generateCV() {
-
+const template = document.getElementById("cvTemplate").value;
   const name = document.getElementById("cvName").value.trim();
   const job = document.getElementById("cvJob").value.trim();
   const phone = document.getElementById("cvPhone").value.trim();
@@ -1794,27 +1806,33 @@ function generateCV() {
   }
 
   const result = document.getElementById("cvResult");
+const isATS = template === "ats";
 
+const cvBorder = isATS ? "none" : "1px solid #e5e5e5";
+const cvRadius = isATS ? "0" : "16px";
+const cvHeaderColor = isATS ? "#111111" : "#4c1d95";
+const cvAccentColor = isATS ? "#222222" : "#6d28d9";
+const cvHeaderBorder = isATS ? "2px solid #222222" : "3px solid #7c3aed";
   result.innerHTML = `
     <div id="lucaraCV" style="
       background:#ffffff;
       color:#222;
       padding:30px 25px;
-      border-radius:16px;
-      border:1px solid #e5e5e5;
+      border-radius:${cvRadius};
+border:${cvBorder};
       text-align:right;
       line-height:1.8;
     ">
 
       <div style="
-        border-bottom:3px solid #7c3aed;
+border-bottom:${cvHeaderBorder};
         padding-bottom:18px;
         margin-bottom:20px;
       ">
         <h1 style="
           margin:0;
           font-size:28px;
-          color:#4c1d95;
+color:${cvHeaderColor};
         ">
           ${escapeCV(name)}
         </h1>
@@ -1840,12 +1858,12 @@ function generateCV() {
         </div>
       </div>
 
-      ${cvSection("النبذة المهنية", summary)}
-      ${cvSection("التعليم", education)}
-      ${cvSection("الخبرات العملية", experience)}
-      ${cvSection("المهارات", skills)}
-      ${cvSection("الدورات والشهادات", courses)}
-      ${cvSection("اللغات", languages)}
+      ${cvSection("النبذة المهنية", summary, cvAccentColor)}
+${cvSection("التعليم", education, cvAccentColor)}
+${cvSection("الخبرات العملية", experience, cvAccentColor)}
+${cvSection("المهارات", skills, cvAccentColor)}
+${cvSection("الدورات والشهادات", courses, cvAccentColor)}
+${cvSection("اللغات", languages, cvAccentColor)}
 
     </div>
 
@@ -1863,7 +1881,7 @@ function generateCV() {
   });
 }
 
-function cvSection(title, value) {
+function cvSection(title, value, color = "#6d28d9") {
 
   if (!value) return "";
 
@@ -1871,7 +1889,7 @@ function cvSection(title, value) {
     <div style="margin-bottom:20px;">
 
       <h2 style="
-        color:#6d28d9;
+color:${color};
         font-size:18px;
         margin:0 0 7px;
         border-bottom:1px solid #eee;
