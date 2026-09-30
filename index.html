@@ -2054,7 +2054,6 @@ async function getLucaraFFmpeg(status) {
   lucaraFFmpegLoaded = true;
   return lucaraFFmpeg;
 }
-
 async function convertVideoToMP3() {
   const input = document.getElementById("mp3VideoInput");
   const status = document.getElementById("mp3Status");
@@ -2067,57 +2066,146 @@ async function convertVideoToMP3() {
   const file = input.files[0];
 
   try {
-    const ffmpeg = await getLucaraFFmpeg(status);
-    const { fetchFile } = FFmpegUtil;
+    status.innerHTML = "⏳ جاري تجهيز التحويل...";
 
-    status.innerHTML = "🎵 جاري تحويل الفيديو إلى MP3...";
-
-    const inputName = "lucara-input.mp4";
-    const outputName = "Lucara-Audio.mp3";
-
-    await ffmpeg.writeFile(
-      inputName,
-      await fetchFile(file)
+    // 1. إنشاء مهمة التحويل في CloudConvert عن طريق Supabase
+    const createResponse = await fetch(
+      `${SUPABASE_URL}/functions/v1/lucara-video-to-mp3`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({
+          action: "create"
+        })
+      }
     );
 
-    await ffmpeg.exec([
-      "-i", inputName,
-      "-vn",
-      "-codec:a", "libmp3lame",
-      "-b:a", "128k",
-      outputName
-    ]);
+    const createData = await createResponse.json();
 
-    const data = await ffmpeg.readFile(outputName);
+    if (!createResponse.ok || !createData.success) {
+      throw new Error(
+        createData.error || "تعذر إنشاء مهمة التحويل"
+      );
+    }
 
-    const blob = new Blob(
-      [data.buffer],
-      { type: "audio/mpeg" }
+    // 2. رفع الفيديو مباشرة إلى CloudConvert
+    status.innerHTML = "⬆️ جاري رفع الفيديو... لا تغلقي الصفحة";
+
+    const formData = new FormData();
+
+    for (const [key, value] of Object.entries(
+      createData.upload.parameters || {}
+    )) {
+      formData.append(key, value);
+    }
+
+    formData.append("file", file);
+
+    const uploadResponse = await fetch(
+      createData.upload.url,
+      {
+        method: "POST",
+        body: formData
+      }
     );
 
-    const url = URL.createObjectURL(blob);
+    if (!uploadResponse.ok) {
+      throw new Error("تعذر رفع الفيديو");
+    }
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = outputName;
+    // 3. انتظار انتهاء التحويل
+    status.innerHTML = "🎵 جاري استخراج الصوت...";
 
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    let finished = false;
+    let downloadUrl = "";
+    let filename = "Lucara-Audio.mp3";
 
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 3000);
+    while (!finished) {
+      await new Promise(resolve =>
+        setTimeout(resolve, 4000)
+      );
 
-    await ffmpeg.deleteFile(inputName);
-    await ffmpeg.deleteFile(outputName);
+      const statusResponse = await fetch(
+        `${SUPABASE_URL}/functions/v1/lucara-video-to-mp3`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({
+            action: "status",
+            jobId: createData.jobId
+          })
+        }
+      );
 
-    status.innerHTML = "✅ تم التحويل والتحميل";
+      const statusData = await statusResponse.json();
+
+      if (!statusResponse.ok || !statusData.success) {
+        throw new Error(
+          statusData.error ||
+          statusData.message ||
+          "تعذر تحويل الفيديو"
+        );
+      }
+
+      if (statusData.status === "error") {
+        throw new Error(
+          statusData.message || "فشل تحويل الفيديو"
+        );
+      }
+
+      if (statusData.status === "finished") {
+        finished = true;
+        downloadUrl = statusData.url;
+        filename =
+          statusData.filename || "Lucara-Audio.mp3";
+      }
+    }
+
+    // 4. إظهار زر التحميل
+    status.innerHTML = `
+      <div style="margin-bottom:12px;">
+        ✅ تم تحويل الفيديو إلى MP3
+      </div>
+
+      <a
+        href="${downloadUrl}"
+        download="${filename}"
+        target="_blank"
+        rel="noopener"
+        style="
+          display:block;
+          width:100%;
+          box-sizing:border-box;
+          padding:13px;
+          border-radius:10px;
+          text-align:center;
+          text-decoration:none;
+          background:#6d28d9;
+          color:white;
+          font-weight:bold;
+        "
+      >
+        ⬇️ تحميل MP3
+      </a>
+    `;
 
   } catch (error) {
     console.error(error);
-    status.innerHTML = "❌ تعذر تحويل الفيديو";
-    alert("حدث خطأ أثناء تحويل الفيديو إلى MP3");
+
+    status.innerHTML =
+      "❌ تعذر تحويل الفيديو. حاولي مرة أخرى.";
+
+    alert(
+      "حدث خطأ أثناء تحويل الفيديو إلى MP3"
+    );
   }
 }
 </script>
