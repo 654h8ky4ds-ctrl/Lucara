@@ -1890,7 +1890,11 @@ function cvSection(title, value) {
     </div>
   `;
 }
-
+function escapeCV(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
 async function printCV() {
   const cv = document.getElementById("lucaraCV");
 
