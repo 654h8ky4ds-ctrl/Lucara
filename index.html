@@ -2022,7 +2022,40 @@ async function printCV() {
     alert("حدث خطأ أثناء إنشاء ملف PDF");
   }
 }
-    async function convertVideoToMP3() {
+    let lucaraFFmpeg = null;
+let lucaraFFmpegLoaded = false;
+
+async function getLucaraFFmpeg(status) {
+  if (lucaraFFmpegLoaded && lucaraFFmpeg) {
+    return lucaraFFmpeg;
+  }
+
+  status.innerHTML = "⚡ جاري تجهيز المحول لأول مرة...";
+
+  const { FFmpeg } = FFmpegWASM;
+  const { fetchFile, toBlobURL } = FFmpegUtil;
+
+  lucaraFFmpeg = new FFmpeg();
+
+  const baseURL =
+    "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd";
+
+  await lucaraFFmpeg.load({
+    coreURL: await toBlobURL(
+      `${baseURL}/ffmpeg-core.js`,
+      "text/javascript"
+    ),
+    wasmURL: await toBlobURL(
+      `${baseURL}/ffmpeg-core.wasm`,
+      "application/wasm"
+    )
+  });
+
+  lucaraFFmpegLoaded = true;
+  return lucaraFFmpeg;
+}
+
+async function convertVideoToMP3() {
   const input = document.getElementById("mp3VideoInput");
   const status = document.getElementById("mp3Status");
 
@@ -2033,42 +2066,34 @@ async function printCV() {
 
   const file = input.files[0];
 
-  status.innerHTML = "⏳ جاري تجهيز محول الصوت...";
-
   try {
-    const { FFmpeg } = FFmpegWASM;
+    const ffmpeg = await getLucaraFFmpeg(status);
     const { fetchFile } = FFmpegUtil;
-
-    const ffmpeg = new FFmpeg();
-
-    await ffmpeg.load({
-      coreURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js",
-      wasmURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm"
-    });
 
     status.innerHTML = "🎵 جاري تحويل الفيديو إلى MP3...";
 
-    const inputName = "input.mp4";
+    const inputName = "lucara-input.mp4";
     const outputName = "Lucara-Audio.mp3";
 
-    await ffmpeg.writeFile(inputName, await fetchFile(file));
+    await ffmpeg.writeFile(
+      inputName,
+      await fetchFile(file)
+    );
 
     await ffmpeg.exec([
-      "-i",
-      inputName,
+      "-i", inputName,
       "-vn",
-      "-codec:a",
-      "libmp3lame",
-      "-q:a",
-      "2",
+      "-codec:a", "libmp3lame",
+      "-b:a", "128k",
       outputName
     ]);
 
     const data = await ffmpeg.readFile(outputName);
 
-    const blob = new Blob([data.buffer], {
-      type: "audio/mpeg"
-    });
+    const blob = new Blob(
+      [data.buffer],
+      { type: "audio/mpeg" }
+    );
 
     const url = URL.createObjectURL(blob);
 
@@ -2082,14 +2107,17 @@ async function printCV() {
 
     setTimeout(() => {
       URL.revokeObjectURL(url);
-    }, 1000);
+    }, 3000);
 
-    status.innerHTML = "✅ تم التحويل إلى MP3 وتحميل الملف";
+    await ffmpeg.deleteFile(inputName);
+    await ffmpeg.deleteFile(outputName);
+
+    status.innerHTML = "✅ تم التحويل والتحميل";
 
   } catch (error) {
     console.error(error);
-    status.innerHTML = "❌ حدث خطأ أثناء التحويل";
-    alert("تعذر تحويل الفيديو إلى MP3");
+    status.innerHTML = "❌ تعذر تحويل الفيديو";
+    alert("حدث خطأ أثناء تحويل الفيديو إلى MP3");
   }
 }
 </script>
