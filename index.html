@@ -571,7 +571,31 @@ onclick="showVideoPayment()"
 
 </div>
 </section>
+<section id="videoToMp3Tool" style="margin-top:30px;">
+  <h3>🎵 تحويل الفيديو إلى MP3</h3>
 
+  <p>
+    اختاري فيديو من جهازك وسيتم تحويل الصوت إلى ملف MP3.
+  </p>
+
+  <input
+    type="file"
+    id="mp3VideoInput"
+    accept="video/*"
+  >
+
+  <button
+    onclick="convertVideoToMP3()"
+    style="width:100%; margin-top:15px;"
+  >
+    تحويل إلى MP3
+  </button>
+
+  <div
+    id="mp3Status"
+    style="margin-top:15px;"
+  ></div>
+</section>
 </main>
 
 
@@ -586,6 +610,8 @@ LUCARA © 2026
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+<script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
   <script>
 const SUPABASE_URL = "https://nswxyqgrhjnpoiunldgd.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zd3h5cWdyaGpucG9pdW5sZGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4NDAxMzUsImV4cCI6MjEwNTQxNjEzNX0.LMv2quAccinWkVWAIfWnt-RfnKnrGm9Ss_vj2TNdreA";
@@ -1994,6 +2020,76 @@ async function printCV() {
   } catch (error) {
     console.error(error);
     alert("حدث خطأ أثناء إنشاء ملف PDF");
+  }
+}
+    async function convertVideoToMP3() {
+  const input = document.getElementById("mp3VideoInput");
+  const status = document.getElementById("mp3Status");
+
+  if (!input.files || !input.files[0]) {
+    alert("اختاري فيديو أولاً");
+    return;
+  }
+
+  const file = input.files[0];
+
+  status.innerHTML = "⏳ جاري تجهيز محول الصوت...";
+
+  try {
+    const { FFmpeg } = FFmpegWASM;
+    const { fetchFile } = FFmpegUtil;
+
+    const ffmpeg = new FFmpeg();
+
+    await ffmpeg.load({
+      coreURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js",
+      wasmURL: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm"
+    });
+
+    status.innerHTML = "🎵 جاري تحويل الفيديو إلى MP3...";
+
+    const inputName = "input.mp4";
+    const outputName = "Lucara-Audio.mp3";
+
+    await ffmpeg.writeFile(inputName, await fetchFile(file));
+
+    await ffmpeg.exec([
+      "-i",
+      inputName,
+      "-vn",
+      "-codec:a",
+      "libmp3lame",
+      "-q:a",
+      "2",
+      outputName
+    ]);
+
+    const data = await ffmpeg.readFile(outputName);
+
+    const blob = new Blob([data.buffer], {
+      type: "audio/mpeg"
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = outputName;
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
+
+    status.innerHTML = "✅ تم التحويل إلى MP3 وتحميل الملف";
+
+  } catch (error) {
+    console.error(error);
+    status.innerHTML = "❌ حدث خطأ أثناء التحويل";
+    alert("تعذر تحويل الفيديو إلى MP3");
   }
 }
 </script>
