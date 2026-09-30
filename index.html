@@ -561,7 +561,8 @@ LUCARA © 2026
 </footer>
   <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+ <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
 const SUPABASE_URL = "https://nswxyqgrhjnpoiunldgd.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zd3h5cWdyaGpucG9pdW5sZGdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4NDAxMzUsImV4cCI6MjEwNTQxNjEzNX0.LMv2quAccinWkVWAIfWnt-RfnKnrGm9Ss_vj2TNdreA";
@@ -1890,7 +1891,7 @@ function cvSection(title, value) {
   `;
 }
 
-function printCV() {
+async function printCV() {
   const cv = document.getElementById("lucaraCV");
 
   if (!cv) {
@@ -1898,102 +1899,66 @@ function printCV() {
     return;
   }
 
-  const printWindow = window.open("", "_blank");
+  try {
+    const canvas = await html2canvas(cv, {
+      scale: 2,
+      backgroundColor: "#ffffff",
+      useCORS: true
+    });
 
-  if (!printWindow) {
-    alert("تعذر فتح السيرة. تأكدي من السماح بالنوافذ المنبثقة.");
-    return;
+    const imgData = canvas.toDataURL("image/png");
+
+    const { jsPDF } = window.jspdf;
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4"
+    });
+
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 10;
+    const imgWidth = pageWidth - (margin * 2);
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = margin;
+
+    pdf.addImage(
+      imgData,
+      "PNG",
+      margin,
+      position,
+      imgWidth,
+      imgHeight
+    );
+
+    heightLeft -= (pageHeight - margin * 2);
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight + margin;
+
+      pdf.addPage();
+
+      pdf.addImage(
+        imgData,
+        "PNG",
+        margin,
+        position,
+        imgWidth,
+        imgHeight
+      );
+
+      heightLeft -= (pageHeight - margin * 2);
+    }
+
+    pdf.save("Lucara-CV.pdf");
+
+  } catch (error) {
+    console.error(error);
+    alert("حدث خطأ أثناء إنشاء ملف PDF");
   }
-
-  printWindow.document.open();
-
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html lang="ar" dir="rtl">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-      <title>السيرة الذاتية</title>
-
-      <style>
-        @page {
-          size: A4;
-          margin: 12mm;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-
-        body {
-          font-family: Arial, Tahoma, sans-serif;
-          background: #ffffff;
-          color: #222;
-          margin: 0;
-          padding: 0;
-          direction: rtl;
-        }
-
-        #lucaraCV {
-          width: 100%;
-          max-width: 190mm;
-          margin: 0 auto;
-          background: white;
-          box-shadow: none !important;
-          border: none !important;
-        }
-
-        .save-note {
-          text-align: center;
-          background: #f3e8ff;
-          color: #5b21b6;
-          padding: 12px;
-          margin-bottom: 15px;
-          border-radius: 10px;
-          font-size: 14px;
-        }
-
-        .print-button {
-          display: block;
-          width: 100%;
-          max-width: 300px;
-          margin: 20px auto;
-          padding: 14px;
-          border: 0;
-          border-radius: 12px;
-          background: #6d28d9;
-          color: white;
-          font-size: 16px;
-          font-weight: bold;
-        }
-
-        @media print {
-          .save-note,
-          .print-button {
-            display: none !important;
-          }
-        }
-      </style>
-    </head>
-
-    <body>
-
-      <div class="save-note">
-        اضغطي الزر بالأسفل، ثم اختاري حفظ كـ PDF.
-      </div>
-
-      ${cv.outerHTML}
-
-      <button class="print-button" onclick="window.print()">
-        حفظ السيرة الذاتية PDF
-      </button>
-
-    </body>
-    </html>
-  `);
-
-  printWindow.document.close();
 }
 </script>
 </body>
