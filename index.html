@@ -448,7 +448,105 @@ onclick="showVideoPayment()"
 
 
 
+<div class="tool">
 
+  <div class="badge">جديد</div>
+
+  <div class="icon">📋</div>
+
+  <h3>إنشاء سيرة ذاتية CV</h3>
+
+  <p>
+    أنشئ سيرتك الذاتية الاحترافية بسهولة وحمّلها بصيغة PDF.
+  </p>
+
+  <button onclick="showCVBuilder()">
+    إنشاء CV
+  </button>
+
+  <div id="cvBuilder" style="display:none; margin-top:20px; text-align:right;">
+
+    <input
+      type="text"
+      id="cvName"
+      placeholder="الاسم الكامل"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px;"
+    >
+
+    <input
+      type="text"
+      id="cvJob"
+      placeholder="المسمى الوظيفي"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px;"
+    >
+
+    <input
+      type="tel"
+      id="cvPhone"
+      placeholder="رقم الجوال"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px;"
+    >
+
+    <input
+      type="email"
+      id="cvEmail"
+      placeholder="البريد الإلكتروني"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px;"
+    >
+
+    <input
+      type="text"
+      id="cvCity"
+      placeholder="المدينة"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px;"
+    >
+
+    <textarea
+      id="cvSummary"
+      placeholder="نبذة مهنية قصيرة عنك"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px; min-height:90px;"
+    ></textarea>
+
+    <textarea
+      id="cvEducation"
+      placeholder="المؤهل الدراسي، التخصص، الجامعة"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px; min-height:80px;"
+    ></textarea>
+
+    <textarea
+      id="cvExperience"
+      placeholder="الخبرات العملية"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px; min-height:100px;"
+    ></textarea>
+
+    <textarea
+      id="cvSkills"
+      placeholder="المهارات — مثال: Excel، Power BI، خدمة العملاء"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px; min-height:80px;"
+    ></textarea>
+
+    <textarea
+      id="cvCourses"
+      placeholder="الدورات والشهادات"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px; min-height:80px;"
+    ></textarea>
+
+    <input
+      type="text"
+      id="cvLanguages"
+      placeholder="اللغات — مثال: العربية، الإنجليزية"
+      style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px;"
+    >
+
+    <button onclick="generateCV()" style="width:100%;">
+      معاينة السيرة الذاتية
+    </button>
+
+    <div id="cvResult" style="margin-top:20px;"></div>
+
+  </div>
+
+</div>
 </section>
 
 </main>
