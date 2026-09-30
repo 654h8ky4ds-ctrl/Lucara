@@ -478,6 +478,17 @@ onclick="showVideoPayment()"
 
   </select>
 </div>
+    <div style="margin-bottom:15px;">
+  <label style="display:block; margin-bottom:7px; font-weight:bold;">
+    لغة السيرة الذاتية
+  </label>
+
+  <select id="cvLanguage"
+    style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+    <option value="ar">العربية 🇸🇦</option>
+    <option value="en">English 🇬🇧</option>
+  </select>
+</div>
     <input
       type="text"
       id="cvName"
@@ -1788,6 +1799,8 @@ resumePaidVideo();
 
 function generateCV() {
 const template = document.getElementById("cvTemplate").value;
+  const language = document.getElementById("cvLanguage").value;
+const isEnglish = language === "en";
   const name = document.getElementById("cvName").value.trim();
   const job = document.getElementById("cvJob").value.trim();
   const phone = document.getElementById("cvPhone").value.trim();
@@ -1820,7 +1833,8 @@ const cvHeaderBorder = isATS ? "2px solid #222222" : "3px solid #7c3aed";
       padding:30px 25px;
       border-radius:${cvRadius};
 border:${cvBorder};
-      text-align:right;
+text-align:${isEnglish ? "left" : "right"};
+direction:${isEnglish ? "ltr" : "rtl"};
       line-height:1.8;
     ">
 
@@ -1858,12 +1872,12 @@ color:${cvHeaderColor};
         </div>
       </div>
 
-      ${cvSection("النبذة المهنية", summary, cvAccentColor)}
-${cvSection("التعليم", education, cvAccentColor)}
-${cvSection("الخبرات العملية", experience, cvAccentColor)}
-${cvSection("المهارات", skills, cvAccentColor)}
-${cvSection("الدورات والشهادات", courses, cvAccentColor)}
-${cvSection("اللغات", languages, cvAccentColor)}
+    ${cvSection(isEnglish ? "Professional Summary" : "النبذة المهنية", summary, cvAccentColor)}
+${cvSection(isEnglish ? "Education" : "التعليم", education, cvAccentColor)}
+${cvSection(isEnglish ? "Work Experience" : "الخبرات العملية", experience, cvAccentColor)}
+${cvSection(isEnglish ? "Skills" : "المهارات", skills, cvAccentColor)}
+${cvSection(isEnglish ? "Courses & Certifications" : "الدورات والشهادات", courses, cvAccentColor)}
+${cvSection(isEnglish ? "Languages" : "اللغات", languages, cvAccentColor)}
 
     </div>
 
@@ -1871,7 +1885,7 @@ ${cvSection("اللغات", languages, cvAccentColor)}
       onclick="printCV()"
       style="width:100%; margin-top:15px;"
     >
-      تحميل / حفظ السيرة PDF
+${isEnglish ? "Download / Save CV as PDF" : "تحميل / حفظ السيرة PDF"}
     </button>
   `;
 
