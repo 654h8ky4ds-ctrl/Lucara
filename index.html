@@ -2114,8 +2114,14 @@ async function convertVideoToMP3() {
     );
 
     if (!uploadResponse.ok) {
-      throw new Error("تعذر رفع الفيديو");
-    }
+  const details = await uploadResponse.text();
+  throw new Error(
+    "فشل رفع الفيديو: " +
+    uploadResponse.status +
+    " - " +
+    details.slice(0, 300)
+  );
+}
 
     // 3. انتظار انتهاء التحويل
     status.innerHTML = "🎵 جاري استخراج الصوت...";
@@ -2195,16 +2201,17 @@ async function convertVideoToMP3() {
   </button>
 `;
 
-  } catch (error) {
-    console.error(error);
+ 
+} catch (error) {
+  console.error("MP3 Conversion Error:", error);
 
-    status.innerHTML =
-      "❌ تعذر تحويل الفيديو. حاولي مرة أخرى.";
+  const errorMessage = error?.message || String(error);
 
-    alert(
-      "حدث خطأ أثناء تحويل الفيديو إلى MP3"
-    );
-  }
+  status.textContent = "❌ " + errorMessage;
+
+  alert("خطأ أثناء تحويل الفيديو:\n" + errorMessage);
+}
+
 }
     async function downloadLucaraMP3(url, filename) {
   try {
