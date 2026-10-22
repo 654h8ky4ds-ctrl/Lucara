@@ -614,11 +614,53 @@ onclick="showVideoPayment()"
     id="mp3Status"
     style="margin-top:15px;"
   ></div>
+
 </section>
+
+<!-- LUCARA - Remove Background Music -->
+<section id="removeMusicTool" class="tool" style="margin-top:30px;">
+
+  <div class="badge">جديد</div>
+  <div class="icon">🎵</div>
+
+  <h3>إزالة الموسيقى من الفيديو بالذكاء الاصطناعي</h3>
+
+  <p>
+    احذف الموسيقى الخلفية من الفيديو مع الاحتفاظ
+    بالكلام والأصوات الطبيعية قدر الإمكان.
+  </p>
+
+  <input
+    type="file"
+    id="removeMusicInput"
+    accept="video/*"
+    style="width:100%; margin:15px 0;"
+  >
+
+  <button
+    type="button"
+    id="removeMusicBtn"
+    disabled
+    style="width:100%;"
+  >
+    🎬 إزالة الموسيقى
+  </button>
+
+  <div id="removeMusicStatus"
+       style="margin-top:15px;">
+    الأداة قيد التجهيز
+  </div>
+
+  <div id="removeMusicResult"
+       style="margin-top:15px;">
+  </div>
+
+</section>
+
 </main>
 
-
 <footer>
+
 
 LUCARA © 2026
 <br>
