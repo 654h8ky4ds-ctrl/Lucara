@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>إدارة الاشتراكات | LUCARA</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+:root{color-scheme:dark;--bg:#0d0a18;--card:#1d1730;--line:#403353;--text:#f9f5ff;--muted:#c3b5d4;--purple:#b991ff;--gold:#ebd09a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Tahoma,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 50% -15%,#422657 0%,#151023 47%,var(--bg) 100%)}
+header{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:19px max(18px,calc((100vw - 1100px)/2));border-bottom:1px solid #ffffff20}
+.logo{color:var(--gold);letter-spacing:2px;font-size:23px;font-weight:900}
+header a{color:#e9dbff;text-decoration:none;font-size:13px}
+main{max-width:1100px;margin:35px auto 70px;padding:0 17px}
+h1{font-size:clamp(23px,5vw,33px);margin:0 0 8px}h2{font-size:19px;margin:0 0 16px}
+.sub{color:var(--muted);line-height:1.9;margin:0 0 25px}
+.panel,.member{border:1px solid var(--line);background:linear-gradient(145deg,#211831,#181222);border-radius:19px;padding:20px}
+.hidden{display:none!important}
+.notice{line-height:2;white-space:pre-wrap;overflow-wrap:anywhere}
+.notice a{color:#d0b5ff}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:24px}
+.stat{padding:19px 14px;border-radius:15px;border:1px solid var(--line);background:#241a39}
+.stat strong{display:block;font-size:26px;margin-bottom:7px}.stat span{color:var(--muted);font-size:13px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+input{font:inherit;border-radius:11px;padding:13px;background:#140f23;color:#fff;border:1px solid #6d5a83;min-width:0}
+#search{flex:1;min-width:220px}
+button{font:inherit;font-weight:700;border:0;border-radius:11px;padding:11px 14px;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.secondary{background:#372b4c;color:#eee5ff;border:1px solid #6e5688}
+.primary{background:#b890f3;color:#1d102e}
+.danger{background:#482734;color:#ffced7;border:1px solid #a86679}
+.members{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.member{min-width:0;display:flex;flex-direction:column;gap:12px}
+.member-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.member-name{font-size:16px;font-weight:800;overflow-wrap:anywhere}
+.member-email{color:var(--muted);font-size:13px;direction:ltr;text-align:right;overflow-wrap:anywhere;margin-top:5px}
+.member-date{font-size:13px;color:var(--muted);line-height:1.9}
+.pill{display:inline-block;font-size:12px;border-radius:30px;padding:7px 11px;white-space:nowrap}
+.pill.active{background:#224339;color:#b6f5db}.pill.pending{background:#43351f;color:#f4dfb4}.pill.expired{background:#482b37;color:#ffd0d8}
+.member-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}.member-actions button{flex:1;min-width:110px}
+#flash{margin-bottom:18px;padding:13px 16px;border-radius:10px;background:#272039;border:1px solid #7a5ea0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}
+#flash.error{border-color:#ad6074;background:#402633}
+footer{font-size:12px;text-align:center;margin-top:30px;color:#a99abf}
+@media(max-width:750px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.members{grid-template-columns:1fr}header{padding:15px 17px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">LUCARA</div>
+  <nav><a href="./">الموقع الرئيسي</a> · <a href="account.html">حسابي</a></nav>
+</header>
+<main>
+  <h1>👑 لوحة إدارة لوكارا</h1>
+  <p class="sub">إدارة الحسابات والاشتراكات الشهرية بقيمة 9 ريالات لمدة 30 يومًا.</p>
+  <div id="flash" class="hidden" role="status" aria-live="polite"></div>
+  <section id="loading" class="panel notice">جارٍ التحقق من تسجيل الدخول وصلاحية الإدارة...</section>
+  <section id="blocked" class="panel notice hidden"></section>
+  <section id="dashboard" class="hidden">
+    <div class="stats">
+      <div class="stat"><strong id="allCount">0</strong><span>جميع الحسابات</span></div>
+      <div class="stat"><strong id="activeCount">0</strong><span>اشتراكات نشطة</span></div>
+      <div class="stat"><strong id="pendingCount">0</strong><span>بانتظار التفعيل</span></div>
+      <div class="stat"><strong id="expiredCount">0</strong><span>اشتراكات منتهية</span></div>
+    </div>
+    <section class="panel">
+      <h2>المشتركون</h2>
+      <div class="toolbar">
+        <input type="search" id="search" placeholder="ابحث بالاسم أو البريد الإلكتروني" aria-label="بحث في المشتركين">
+        <button type="button" id="refresh" class="secondary">تحديث القائمة</button>
+      </div>
+      <div id="members" class="members"></div>
+      <p class="sub" id="empty" hidden>لا توجد حسابات مطابقة.</p>
+    </section>
+  </section>
+  <footer>© LUCARA PREMIUM — لوحة خاصة بالإدارة</footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+'use strict';
+const PROJECT_URL='https://zzxnxukonjppwlfpmlrs.supabase.co';
+const PUBLISHABLE_KEY='sb_publishable_2JnyhWumzzJpWag92DGMQA_PGqf72U9';
+const $=id=>document.getElementById(id);
+let client, people=[], subscriptions=new Map(), busy=false;
+const DAY=24*60*60*1000;
+function showMessage(message,error=false){const el=$('flash');el.textContent=message;el.className=error?'error':'';el.classList.remove('hidden')}
+function statusOf(record){if(!record)return 'pending';return new Date(record.expires_at).getTime()>Date.now()?'active':'expired'}
+function formatDate(date){return new Intl.DateTimeFormat('ar-SA-u-ca-gregory',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Riyadh'}).format(new Date(date))}
+function hideLoading(){$('loading').classList.add('hidden')}
+function block(message){hideLoading();$('dashboard').classList.add('hidden');$('blocked').classList.remove('hidden');$('blocked').textContent=message}
+async function fetchAll(table,columns,order=false){
+  let data=[],start=0;
+  for(;;){
+    let query=client.from(table).select(columns).range(start,start+499);
+    if(order)query=query.order('created_at',{ascending:false});
+    else query=query.order('user_id',{ascending:true});
+    const {data:chunk,error}=await query;
+    if(error)throw error;
+    data.push(...chunk);
+    if(chunk.length<500)break;
+    start+=500;
+  }
+  return data;
+}
+async function refresh(){
+  $('refresh').disabled=true;
+  try{
+    const [profiles,subs]=await Promise.all([
+      fetchAll('lucara_profiles','user_id,email,display_name,created_at',true),
+      fetchAll('lucara_subscriptions','user_id,activated_at,expires_at')
+    ]);
+    people=profiles;
+    subscriptions=new Map(subs.map(s=>[s.user_id,s]));
+    draw();
+  }catch(error){showMessage('تعذّر تحميل بيانات المشتركين: '+error.message,true)}
+  finally{$('refresh').disabled=false}
+}
+function make(tag,cls,text){
+  const el=document.createElement(tag);
+  if(cls)el.className=cls;
+  if(text!==undefined)el.textContent=text;
+  return el;
+}
+function draw(){
+  const counts={active:0,pending:0,expired:0};
+  for(const p of people)counts[statusOf(subscriptions.get(p.user_id))]++;
+  $('allCount').textContent=people.length;
+  $('activeCount').textContent=counts.active;
+  $('pendingCount').textContent=counts.pending;
+  $('expiredCount').textContent=counts.expired;
+  const term=$('search').value.trim().toLocaleLowerCase();
+  const matches=people.filter(p=>(p.email+' '+(p.display_name||'')).toLocaleLowerCase().includes(term));
+  const container=$('members');container.replaceChildren();
+  $('empty').hidden=matches.length!==0;
+  for(const p of matches){
+    const sub=subscriptions.get(p.user_id);
+    const status=statusOf(sub);
+    const card=make('article','member');
+    const head=make('div','member-top');
+    const info=make('div','');
+    info.append(make('div','member-name',p.display_name||'مستخدم لوكارا'));
+    info.append(make('div','member-email',p.email||'لا يوجد بريد'));
+    head.append(info);
+    const labels={active:'نشط',pending:'بانتظار التفعيل',expired:'منتهي'};
+    head.append(make('span','pill '+status,labels[status]));
+    card.append(head);
+    const details=make('div','member-date');
+    details.textContent='تاريخ التسجيل: '+formatDate(p.created_at)+(sub?'\nنهاية الاشتراك: '+formatDate(sub.expires_at):'');
+    details.style.whiteSpace='pre-line';
+    card.append(details);
+    const actions=make('div','member-actions');
+    const activate=make('button','primary',status==='active'?'تجديد 30 يومًا':'تفعيل 30 يومًا');
+    activate.type='button';activate.dataset.action='activate';activate.dataset.id=p.user_id;
+    actions.append(activate);
+    if(sub){
+      const stop=make('button','danger','إيقاف الاشتراك');
+      stop.type='button';stop.dataset.action='stop';stop.dataset.id=p.user_id;
+      actions.append(stop);
+    }
+    card.append(actions);container.append(card);
+  }
+}
+async function changeSubscription(id,action){
+  if(busy)return;
+  const person=people.find(p=>p.user_id===id);
+  if(!person)return;
+  const sub=subscriptions.get(id);
+  const name=person.display_name||person.email;
+  const ask=action==='stop'?'إيقاف اشتراك '+name+'؟ سيُحذف سجل الاشتراك الحالي.':'تفعيل/تجديد اشتراك '+name+' لمدة 30 يومًا؟ تأكد من استلام الدفع أولًا.';
+  if(!confirm(ask))return;
+  busy=true;
+  document.querySelectorAll('[data-action]').forEach(btn=>btn.disabled=true);
+  try{
+    let error;
+    if(action==='stop'){
+      ({error}=await client.from('lucara_subscriptions').delete().eq('user_id',id));
+    }else{
+      const now=new Date();
+      const previousExpiry=sub?new Date(sub.expires_at).getTime():0;
+      const isActive=previousExpiry>now.getTime();
+      const base=isActive?previousExpiry:now.getTime();
+      const start=isActive?sub.activated_at:now.toISOString();
+      ({error}=await client.from('lucara_subscriptions').upsert({
+        user_id:id,activated_at:start,expires_at:new Date(base+30*DAY).toISOString()
+      },{onConflict:'user_id'}));
+    }
+    if(error)throw error;
+    showMessage(action==='stop'?'تم إيقاف الاشتراك.':'تم حفظ التفعيل/التجديد لمدة 30 يومًا.');
+    await refresh();
+  }catch(error){showMessage('تعذّر تعديل الاشتراك: '+error.message,true)}
+  finally{busy=false;document.querySelectorAll('[data-action]').forEach(btn=>btn.disabled=false)}
+}
+$('members').addEventListener('click',event=>{
+  const button=event.target.closest('button[data-action]');
+  if(button)changeSubscription(button.dataset.id,button.dataset.action);
+});
+$('refresh').addEventListener('click',refresh);
+$('search').addEventListener('input',draw);
+(async function init(){
+  try{
+    if(!window.supabase?.createClient)throw new Error('تعذّر تحميل مكتبة Supabase. جرّب تحديث الصفحة.');
+    client=window.supabase.createClient(PROJECT_URL,PUBLISHABLE_KEY);
+    const {data:{user},error:userError}=await client.auth.getUser();
+    if(userError||!user){block('يجب تسجيل الدخول أولًا من صفحة حسابك: account.html');return}
+    const {data:admin,error:adminError}=await client.from('lucara_admins').select('user_id').eq('user_id',user.id).maybeSingle();
+    if(adminError)throw adminError;
+    if(!admin){block('هذا الحساب ليس لديه صلاحية إدارة لوكارا.');return}
+    hideLoading();$('dashboard').classList.remove('hidden');
+    await refresh();
+  }catch(error){block('تعذّر فتح لوحة الإدارة: '+error.message)}
+})();
+</script>
+</body>
+</html>
