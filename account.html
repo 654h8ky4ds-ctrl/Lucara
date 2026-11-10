@@ -71,7 +71,7 @@
       <h2>أهلًا بك في لوكارا 💜</h2>
       <p class="accountInfo">الحساب: <strong id="accountEmail"></strong></p>
       <div class="statusPill">تم تسجيل دخولك. الاشتراك المدفوع غير مرتبط بالحساب حتى الآن، ولن تُفتح الأدوات المدفوعة بمجرد إنشاء الحساب.</div>
-      <p class="accountInfo">للاشتراك لمدة 30 يومًا مقابل <strong>9 ريالات</strong>، تواصلي معنا عبر الواتساب:</p>
+      <p class="accountInfo">للاشتراك لمدة 30 يومًا مقابل <strong>9 ريالات</strong>، تواصل معنا عبر الواتساب:</p>
       <a id="waLink" class="whatsapp" href="#" target="_blank" rel="noopener noreferrer">💬 طلب الاشتراك عبر واتساب</a>
       <button id="logoutBtn" class="logout" type="button">تسجيل الخروج</button>
     </section>
@@ -132,7 +132,7 @@
       try {
         if (mode === 'signup') {
           const name = $('name').value.trim();
-          if (!name) { setMessage('اكتبي الاسم أولًا.', true); return; }
+          if (!name) { setMessage('اكتب الاسم أولًا.', true); return; }
           const { data, error } = await client.auth.signUp({
             email, password,
             options: {
@@ -145,7 +145,7 @@
             renderUser(data.user);
             setMessage('تم إنشاء الحساب. يمكنك الآن طلب الاشتراك عبر واتساب.');
           } else {
-            setMessage('إذا تم قبول طلب التسجيل، ستصلك رسالة لتأكيد البريد الإلكتروني. افتحي الرابط ثم سجلي الدخول هنا.');
+            setMessage('إذا تم قبول طلب التسجيل، ستصلك رسالة لتأكيد البريد الإلكتروني. افتح الرابط ثم سجل الدخول هنا.');
           }
         } else {
           const { data, error } = await client.auth.signInWithPassword({ email, password });
@@ -154,7 +154,7 @@
           setMessage('تم تسجيل الدخول بنجاح.');
         }
       } catch (error) {
-        setMessage('تعذّر إكمال العملية: ' + (error.message || 'حاولي مرة أخرى.'), true);
+        setMessage('تعذّر إكمال العملية: ' + (error.message || 'حاول مرة أخرى.'), true);
       } finally {
         btn.disabled = false;
       }
@@ -169,7 +169,7 @@
 
     (async function init() {
       if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-        setMessage('تعذّر تحميل مكتبة Supabase. تأكدي من اتصال الإنترنت وحدّثي الصفحة.', true);
+        setMessage('تعذّر تحميل مكتبة Supabase. تأكد من اتصال الإنترنت وحدّث الصفحة.', true);
         $('submitBtn').disabled = true;
         return;
       }
