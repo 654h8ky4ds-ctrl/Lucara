@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="إنشاء حساب وتسجيل الدخول إلى لوكارا بريميوم">
+  <title>حسابي | LUCARA PREMIUM</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0d0918; --box:#1c1530; --line:#45325f; --txt:#fff9ff; --sub:#c3b5d6; --purple:#bb91ff; --gold:#efd29b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:Tahoma,Arial,sans-serif; color:var(--txt); background:radial-gradient(circle at 50% -10%,#43245d 0%,#140e24 48%,var(--bg) 100%); min-height:100vh; }
+    header { display:flex; justify-content:space-between; align-items:center; padding:20px; border-bottom:1px solid #ffffff24; }
+    .logo { color:var(--gold); font-size:22px; font-weight:900; letter-spacing:2px; }
+    header a { color:#e1cef7; font-size:13px; text-decoration:none; }
+    main { width:min(100% - 30px, 460px); margin:42px auto 70px; }
+    .heading { text-align:center; line-height:1.8; margin-bottom:22px; }
+    .heading h1 { font-size:26px; margin:4px 0; }
+    .heading p { margin:0; color:var(--sub); font-size:14px; }
+    .panel { padding:24px; border-radius:20px; border:1px solid var(--line); background:linear-gradient(145deg,#231835,#171124); box-shadow:0 24px 70px #0006; }
+    .tabs { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:22px; }
+    .tab { background:#322644; color:#e8dbff; border:1px solid #5f4a7c; border-radius:11px; padding:12px; font:inherit; cursor:pointer; }
+    .tab.active { color:#170e27; background:var(--purple); border-color:var(--purple); font-weight:700; }
+    label { display:block; font-size:14px; font-weight:700; margin:14px 0 7px; }
+    input { display:block; width:100%; background:#120f20; border:1px solid #66527d; color:#fff; font:inherit; padding:13px; border-radius:10px; direction:ltr; text-align:left; }
+    input:focus { outline:2px solid var(--purple); outline-offset:1px; }
+    button.mainBtn { margin-top:23px; width:100%; border:0; border-radius:11px; background:linear-gradient(95deg,#9367ed,#c195ff); color:#1b0b2f; font:inherit; font-weight:bold; padding:14px; cursor:pointer; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .message { margin-top:16px; padding:12px; border:1px solid #9a72cd; border-radius:10px; color:#f3e8ff; line-height:1.9; display:none; white-space:pre-wrap; overflow-wrap:anywhere; font-size:14px; }
+    .message.error { border-color:#d36b80; }
+    .note { color:var(--sub); font-size:12px; line-height:2; margin:17px 0 0; }
+    .accountInfo { line-height:2.1; color:#edddff; overflow-wrap:anywhere; }
+    .statusPill { background:#46361f; border:1px solid #a37d40; color:#ffe6af; border-radius:10px; padding:12px; line-height:1.9; margin:15px 0; font-size:14px; }
+    .whatsapp { display:block; background:#25d366; color:#071b0e; font-weight:bold; border-radius:12px; padding:14px; text-align:center; text-decoration:none; margin-top:15px; }
+    .logout { width:100%; margin-top:13px; font:inherit; border:1px solid #755b91; color:#e5d5fb; background:transparent; border-radius:11px; padding:12px; cursor:pointer; }
+    .hidden { display:none !important; }
+    footer { text-align:center; color:#9f91b5; font-size:12px; margin-top:25px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">LUCARA</div>
+    <a href="./">العودة للموقع ←</a>
+  </header>
+  <main>
+    <div class="heading">
+      <div>👑</div>
+      <h1>حساب LUCARA PREMIUM</h1>
+      <p>أنشئ حسابك، ثم اشترك عبر واتساب بـ9 ريالات لمدة 30 يومًا.</p>
+    </div>
+
+    <section class="panel" id="authPanel">
+      <div class="tabs">
+        <button type="button" class="tab active" id="loginTab">تسجيل الدخول</button>
+        <button type="button" class="tab" id="signupTab">حساب جديد</button>
+      </div>
+      <form id="authForm">
+        <div id="nameWrap" class="hidden">
+          <label for="name">الاسم</label>
+          <input id="name" autocomplete="name" maxlength="80">
+        </div>
+        <label for="email">البريد الإلكتروني</label>
+        <input id="email" type="email" required autocomplete="email" placeholder="name@example.com">
+        <label for="password">كلمة المرور</label>
+        <input id="password" type="password" required minlength="6" autocomplete="current-password" placeholder="6 أحرف على الأقل">
+        <button class="mainBtn" id="submitBtn" type="submit">تسجيل الدخول</button>
+      </form>
+      <p class="note">إنشاء الحساب لا يعني تفعيل الاشتراك. يُفعّل الاشتراك بعد تأكيد الدفع من إدارة لوكارا.</p>
+    </section>
+
+    <section class="panel hidden" id="memberPanel">
+      <h2>أهلًا بك في لوكارا 💜</h2>
+      <p class="accountInfo">الحساب: <strong id="accountEmail"></strong></p>
+      <div class="statusPill">تم تسجيل دخولك. الاشتراك المدفوع غير مرتبط بالحساب حتى الآن، ولن تُفتح الأدوات المدفوعة بمجرد إنشاء الحساب.</div>
+      <p class="accountInfo">للاشتراك لمدة 30 يومًا مقابل <strong>9 ريالات</strong>، تواصلي معنا عبر الواتساب:</p>
+      <a id="waLink" class="whatsapp" href="#" target="_blank" rel="noopener noreferrer">💬 طلب الاشتراك عبر واتساب</a>
+      <button id="logoutBtn" class="logout" type="button">تسجيل الخروج</button>
+    </section>
+
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+    <footer>© LUCARA — حسابك خاص بك</footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    'use strict';
+    const PROJECT_URL = 'https://zzxnxukonjppwlfpmlrs.supabase.co';
+    const PUBLISHABLE_KEY = 'sb_publishable_2JnyhWumzzJpWag92DGMQA_PGqf72U9';
+    const WHATSAPP = '966554765405';
+    const $ = id => document.getElementById(id);
+    let client;
+    let mode = 'login';
+
+    function setMessage(text, isError = false) {
+      const el = $('message');
+      el.textContent = text;
+      el.classList.toggle('error', isError);
+      el.style.display = text ? 'block' : 'none';
+    }
+
+    function setMode(next) {
+      mode = next;
+      $('loginTab').classList.toggle('active', next === 'login');
+      $('signupTab').classList.toggle('active', next === 'signup');
+      $('nameWrap').classList.toggle('hidden', next !== 'signup');
+      $('name').required = next === 'signup';
+      $('password').autocomplete = next === 'signup' ? 'new-password' : 'current-password';
+      $('submitBtn').textContent = next === 'signup' ? 'إنشاء حساب' : 'تسجيل الدخول';
+      setMessage('');
+    }
+
+    function renderUser(user) {
+      $('authPanel').classList.toggle('hidden', Boolean(user));
+      $('memberPanel').classList.toggle('hidden', !user);
+      if (user) {
+        $('accountEmail').textContent = user.email || 'مستخدم';
+        const message = 'مرحبًا لوكارا، أرغب بالاشتراك في LUCARA PREMIUM لمدة 30 يومًا بقيمة 9 ريالات.\nالبريد المرتبط بحسابي: ' + (user.email || '');
+        $('waLink').href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(message);
+      }
+    }
+
+    $('loginTab').addEventListener('click', () => setMode('login'));
+    $('signupTab').addEventListener('click', () => setMode('signup'));
+
+    $('authForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!client) { setMessage('تعذّر تحميل خدمة تسجيل الدخول. تأكد من الإنترنت وحدّث الصفحة.', true); return; }
+      const email = $('email').value.trim();
+      const password = $('password').value;
+      const btn = $('submitBtn');
+      btn.disabled = true;
+      setMessage('جارٍ تنفيذ الطلب...');
+      try {
+        if (mode === 'signup') {
+          const name = $('name').value.trim();
+          if (!name) { setMessage('اكتبي الاسم أولًا.', true); return; }
+          const { data, error } = await client.auth.signUp({
+            email, password,
+            options: {
+              data: { display_name: name },
+              emailRedirectTo: location.origin + location.pathname
+            }
+          });
+          if (error) throw error;
+          if (data.session) {
+            renderUser(data.user);
+            setMessage('تم إنشاء الحساب. يمكنك الآن طلب الاشتراك عبر واتساب.');
+          } else {
+            setMessage('إذا تم قبول طلب التسجيل، ستصلك رسالة لتأكيد البريد الإلكتروني. افتحي الرابط ثم سجلي الدخول هنا.');
+          }
+        } else {
+          const { data, error } = await client.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          renderUser(data.user);
+          setMessage('تم تسجيل الدخول بنجاح.');
+        }
+      } catch (error) {
+        setMessage('تعذّر إكمال العملية: ' + (error.message || 'حاولي مرة أخرى.'), true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    $('logoutBtn').addEventListener('click', async () => {
+      if (!client) return;
+      const { error } = await client.auth.signOut();
+      if (error) setMessage('تعذّر تسجيل الخروج: ' + error.message, true);
+      else { renderUser(null); setMessage('تم تسجيل الخروج.'); }
+    });
+
+    (async function init() {
+      if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+        setMessage('تعذّر تحميل مكتبة Supabase. تأكدي من اتصال الإنترنت وحدّثي الصفحة.', true);
+        $('submitBtn').disabled = true;
+        return;
+      }
+      client = window.supabase.createClient(PROJECT_URL, PUBLISHABLE_KEY);
+      client.auth.onAuthStateChange((_event, session) => renderUser(session?.user || null));
+      const { data, error } = await client.auth.getSession();
+      if (error) setMessage('تعذّر استعادة الجلسة: ' + error.message, true);
+      else renderUser(data.session?.user || null);
+    })();
+  </script>
+</body>
+</html>
