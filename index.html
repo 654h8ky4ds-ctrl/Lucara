@@ -2354,5 +2354,677 @@ async function convertVideoToMP3() {
   </a>
 </div>
 
+<!-- LUCARA | تصميم الواجهة الجديد -->
+<style>
+:root{
+  --lc-purple:#6d28d9;
+  --lc-ink:#241333;
+  --lc-muted:#746981;
+}
+
+body.lc-modern{
+  background:#f8f6fc;
+  color:var(--lc-ink);
+}
+
+body.lc-modern header{
+  padding:18px 20px;
+  background:#170f27;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  text-align:right;
+}
+
+body.lc-modern header .logo{
+  font-size:30px;
+  color:#f2d6a6;
+  letter-spacing:2px;
+}
+
+body.lc-modern header>p{
+  display:none;
+}
+
+.lc-header-links a{
+  display:inline-block;
+  text-decoration:none;
+  padding:10px 14px;
+  color:white;
+  border:1px solid #81689d;
+  border-radius:12px;
+  font-size:13px;
+  font-weight:bold;
+}
+
+body.lc-modern main.container{
+  max-width:1200px;
+  padding:24px 16px 44px;
+}
+
+body.lc-modern main>.intro{
+  display:none;
+}
+
+/* واجهة الاشتراك */
+
+.lc-hero{
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+  gap:18px;
+  margin-bottom:32px;
+}
+
+.lc-welcome,
+.lc-subscription{
+  border-radius:24px;
+  padding:30px;
+  box-shadow:0 14px 35px #24133312;
+}
+
+.lc-welcome{
+  background:linear-gradient(
+    125deg,#26133e,#59308f
+  );
+  color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+}
+
+.lc-kicker{
+  font-size:13px;
+  font-weight:bold;
+  color:#eed4a5;
+}
+
+.lc-welcome h2{
+  font-size:clamp(27px,4vw,43px);
+  line-height:1.45;
+  margin:12px 0;
+}
+
+.lc-welcome h2 span{
+  color:#e8c8ff;
+}
+
+.lc-welcome p{
+  color:#eadff4;
+  font-size:15px;
+  line-height:1.9;
+}
+
+.lc-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.lc-actions a{
+  text-decoration:none;
+  padding:12px 18px;
+  border-radius:12px;
+  font-weight:bold;
+  font-size:14px;
+}
+
+.lc-actions a:first-child{
+  background:white;
+  color:#4b217e;
+}
+
+.lc-actions a:last-child{
+  border:1px solid #bea8d5;
+  color:white;
+}
+
+.lc-subscription{
+  background:white;
+  border:1px solid #e3d8ee;
+}
+
+.lc-plan-label{
+  font-size:14px;
+  font-weight:bold;
+  color:#6c35aa;
+}
+
+.lc-price{
+  font-size:40px;
+  font-weight:900;
+  color:#321a55;
+  margin:12px 0;
+}
+
+.lc-price small{
+  font-size:15px;
+  font-weight:normal;
+  color:#746981;
+}
+
+.lc-subscription p{
+  color:#655b71;
+  font-size:14px;
+  line-height:1.85;
+}
+
+.lc-whatsapp{
+  display:block;
+  background:#6d28d9;
+  color:white;
+  text-align:center;
+  text-decoration:none;
+  padding:13px;
+  border-radius:13px;
+  font-weight:bold;
+  margin:12px 0;
+}
+
+.lc-activation{
+  color:#365c47;
+  font-size:12px;
+  font-weight:bold;
+  line-height:1.8;
+}
+
+.lc-fee-note{
+  color:#7a7085;
+  font-size:12px;
+  line-height:1.7;
+  margin-top:8px;
+}
+
+/* البحث والتصنيفات */
+
+.lc-catalog-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+
+.lc-catalog-head h2{
+  font-size:25px;
+  margin:0;
+}
+
+.lc-search{
+  width:310px;
+  max-width:100%;
+  border:1px solid #d6c6e9;
+  border-radius:12px;
+  padding:12px 14px;
+  background:white;
+  color:#241333;
+  font:inherit;
+}
+
+.lc-filters{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:18px;
+}
+
+body.lc-modern .lc-filters button{
+  margin:0;
+  background:white;
+  color:#56347d;
+  border:1px solid #d9c9e9;
+  border-radius:30px;
+  padding:9px 15px;
+  font-size:13px;
+}
+
+body.lc-modern .lc-filters button.lc-active{
+  background:#6d28d9;
+  color:white;
+  border-color:#6d28d9;
+}
+
+.lc-result-count{
+  font-size:12px;
+  color:#756b80;
+}
+
+/* ترتيب جميع الأدوات */
+
+body.lc-modern .tools{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+  align-items:stretch;
+}
+
+body.lc-modern .tools>.tool{
+  min-width:0;
+  width:100%;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  padding:22px 18px;
+  border:1px solid #e6def0;
+  border-radius:19px;
+  background:white;
+  box-shadow:0 6px 24px #2d17420b;
+  overflow-wrap:anywhere;
+  text-align:center;
+}
+
+body.lc-modern .tools>.tool>.icon{
+  font-size:35px;
+  margin-bottom:7px;
+}
+
+body.lc-modern .tools>.tool h3{
+  font-size:17px;
+  line-height:1.55;
+  color:#29183a;
+  margin:7px 0 9px;
+}
+
+body.lc-modern .tools>.tool>p:first-of-type{
+  font-size:13px;
+  color:#756b80;
+  line-height:1.75;
+  min-height:0;
+  margin:4px 0 14px;
+}
+
+body.lc-modern .tools>.tool>button:not(.lc-close){
+  margin-top:auto;
+  width:100%;
+  font-weight:bold;
+}
+
+body.lc-modern .tools>.tool button,
+body.lc-modern .tools>.tool input,
+body.lc-modern .tools>.tool textarea,
+body.lc-modern .tools>.tool select{
+  max-width:100%;
+  min-width:0;
+}
+
+body.lc-modern .tools>.tool input[type=file]{
+  width:100%;
+  font-size:12px;
+}
+
+body.lc-modern .tools>.tool.lc-expanded{
+  grid-column:1/-1;
+  text-align:right;
+}
+
+body.lc-modern .tools>.tool.lc-hidden{
+  display:none;
+}
+
+.lc-close{
+  display:none!important;
+}
+
+body.lc-modern .tools>.tool.lc-expanded .lc-close{
+  display:block!important;
+  align-self:flex-end;
+  background:#f1eafb;
+  color:#5a288b;
+  padding:8px 12px;
+  font-size:12px;
+  margin-bottom:10px;
+}
+
+/* الجوال */
+
+@media(max-width:860px){
+  .lc-hero{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:700px){
+  body.lc-modern .tools{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:11px;
+  }
+
+  body.lc-modern .tools>.tool{
+    padding:15px 11px;
+    border-radius:15px;
+  }
+
+  body.lc-modern .tools>.tool h3{
+    font-size:14px;
+  }
+
+  body.lc-modern .tools>.tool>p:first-of-type{
+    font-size:12px;
+  }
+
+  body.lc-modern .tools>.tool button{
+    padding:10px 7px;
+    font-size:12px;
+  }
+
+  body.lc-modern header .logo{
+    font-size:25px;
+  }
+
+  .lc-header-links a{
+    font-size:12px;
+    padding:9px;
+  }
+
+  .lc-welcome,
+  .lc-subscription{
+    padding:22px;
+  }
+
+  .lc-search{
+    width:100%;
+  }
+}
+
+@media(max-width:340px){
+  body.lc-modern .tools{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
+<script>
+(function(){
+
+function setupLucaraModern(){
+
+  const main = document.querySelector('main.container');
+  const grid = main?.querySelector('section.tools');
+  const header = document.querySelector('body > header');
+
+  if(!main || !grid || !header ||
+     document.getElementById('lc-hero')) return;
+
+  document.body.classList.add('lc-modern');
+
+  // زر الحساب أعلى الموقع
+  const nav = document.createElement('nav');
+  nav.className = 'lc-header-links';
+  nav.innerHTML =
+    '<a href="account.html">👤 تسجيل الدخول / حسابي</a>';
+
+  header.appendChild(nav);
+
+  // قسم الاشتراك
+  const hero = document.createElement('section');
+  hero.id = 'lc-hero';
+  hero.className = 'lc-hero';
+
+  const whatsapp =
+    'https://wa.me/966554765405?text=' +
+    encodeURIComponent(
+      'مرحبًا، أرغب بالاشتراك في لوكارا بريميوم لمدة 30 يومًا بقيمة 9 ريالات.'
+    );
+
+  hero.innerHTML = `
+    <div class="lc-welcome">
+      <span class="lc-kicker">
+        ✦ LUCARA | أدواتك الرقمية
+      </span>
+
+      <h2>
+        أنجز مهامك بسهولة
+        <br>
+        <span>في مكان واحد</span>
+      </h2>
+
+      <p>
+        أدوات PDF والصور والفيديو والصوت
+        ورموز QR، بواجهة واضحة وسهلة الاستخدام.
+      </p>
+
+      <div class="lc-actions">
+        <a href="#lc-catalog">تصفح الأدوات</a>
+        <a href="account.html">إنشاء حساب</a>
+      </div>
+    </div>
+
+    <aside class="lc-subscription">
+      <span class="lc-plan-label">
+        👑 LUCARA PREMIUM
+      </span>
+
+      <div class="lc-price">
+        9 ريال <small>/ 30 يومًا</small>
+      </div>
+
+      <p>
+        أنشئ حسابك واطلب الاشتراك عبر واتساب،
+        ثم استخدم الأدوات المتاحة ضمن الباقة
+        بعد التفعيل.
+      </p>
+
+      <a class="lc-whatsapp"
+         href="${whatsapp}"
+         target="_blank"
+         rel="noopener noreferrer">
+        💬 اشترك الآن عبر واتساب
+      </a>
+
+      <div class="lc-activation">
+        ⚡ التفعيل فور تأكيد السداد من الإدارة
+        عبر واتساب (يدويًا).
+      </div>
+
+      <div class="lc-fee-note">
+        بعض الخدمات مثل تحريك الصور
+        بالذكاء الاصطناعي لها رسوم منفصلة حاليًا.
+        لا يوجد تجديد تلقائي.
+      </div>
+    </aside>
+  `;
+
+  main.insertBefore(hero, main.firstElementChild);
+
+  // ضم الأدوات المنفصلة إلى الشبكة
+  const mp3 = document.getElementById('videoToMp3Tool');
+
+  if(mp3){
+    mp3.classList.add('tool');
+    mp3.style.marginTop = '';
+
+    if(!mp3.querySelector('.icon')){
+      mp3.insertAdjacentHTML(
+        'afterbegin',
+        '<div class="icon">🎧</div>'
+      );
+    }
+
+    grid.appendChild(mp3);
+  }
+
+  const music = document.getElementById('removeMusicTool');
+
+  if(music){
+    music.style.marginTop = '';
+    grid.appendChild(music);
+  }
+
+  // إزالة بطاقة الاشتراك القديمة المكررة
+  const oldPlan = [...grid.children].find(el =>
+    el.classList?.contains('tool') &&
+    el.querySelector('h3')?.textContent.includes(
+      'اشتراك LUCARA PREMIUM'
+    )
+  );
+
+  if(oldPlan) oldPlan.remove();
+
+  // إزالة زر الدخول القديم أسفل الصفحة
+  [...document.body.children].forEach(el => {
+    if(
+      el.tagName === 'DIV' &&
+      el.querySelector(':scope > a[href="account.html"]')
+    ){
+      el.remove();
+    }
+  });
+
+  // ترتيب الأدوات حسب أهميتها
+  const order = [
+    'ضغط ملفات PDF',
+    'تحويل الصور إلى PDF',
+    'ضغط الصور',
+    'تحويل الصور إلى JPG',
+    'إنشاء رمز QR',
+    'إنشاء سيرة',
+    'تحويل الفيديو إلى MP3',
+    'تحويل الفيديو إلى GIF',
+    'إزالة الموسيقى',
+    'تحريك الصور',
+    'تحويل الملف إلى رابط'
+  ];
+
+  const cards = [...grid.children].filter(el =>
+    el.classList?.contains('tool')
+  );
+
+  function rank(card){
+    const title = card.querySelector('h3')?.textContent || '';
+    const index = order.findIndex(x => title.includes(x));
+    return index === -1 ? 99 : index;
+  }
+
+  cards.sort((a,b) => rank(a)-rank(b))
+       .forEach(card => grid.appendChild(card));
+
+  cards.forEach(card => {
+    const title = card.querySelector('h3')?.textContent || '';
+
+    card.dataset.category =
+      /PDF/.test(title) ? 'pdf' :
+      /GIF|MP3|فيديو|الموسيقى|تحريك/.test(title) ? 'media' :
+      /الصور|الصورة|JPG|PNG|WEBP/.test(title) ? 'image' :
+      'other';
+
+    const heading = card.querySelector('h3');
+
+    if(heading){
+      heading.textContent = heading.textContent
+        .replaceAll('مجانًا','')
+        .replaceAll('مجانية','')
+        .trim();
+    }
+
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'lc-close';
+    close.textContent = 'تصغير البطاقة ✕';
+
+    close.addEventListener('click', () => {
+      card.classList.remove('lc-expanded');
+    });
+
+    card.insertBefore(close,card.firstChild);
+  });
+
+  // البحث والتصنيفات
+  const catalog = document.createElement('section');
+  catalog.id = 'lc-catalog';
+
+  catalog.innerHTML = `
+    <div class="lc-catalog-head">
+      <h2>استكشف أدوات لوكارا</h2>
+      <input class="lc-search"
+             id="lc-search"
+             type="search"
+             placeholder="ابحث عن أداة...">
+    </div>
+
+    <div class="lc-filters">
+      <button class="lc-active"
+              data-filter="all">جميع الأدوات</button>
+      <button data-filter="pdf">PDF</button>
+      <button data-filter="image">الصور</button>
+      <button data-filter="media">الفيديو والصوت</button>
+      <button data-filter="other">أدوات أخرى</button>
+    </div>
+
+    <p class="lc-result-count" id="lc-count"></p>
+  `;
+
+  grid.before(catalog);
+
+  const search = catalog.querySelector('#lc-search');
+  let selected = 'all';
+
+  function applyFilters(){
+    const q = search.value.trim().toLowerCase();
+    let visible = 0;
+
+    cards.forEach(card => {
+      const match =
+        (selected === 'all' ||
+         card.dataset.category === selected) &&
+        card.textContent.toLowerCase().includes(q);
+
+      card.classList.toggle('lc-hidden',!match);
+
+      if(match) visible++;
+    });
+
+    catalog.querySelector('#lc-count').textContent =
+      'الأدوات المعروضة: ' + visible;
+  }
+
+  catalog.querySelectorAll('[data-filter]')
+    .forEach(btn => {
+      btn.addEventListener('click', () => {
+        selected = btn.dataset.filter;
+
+        catalog.querySelectorAll('[data-filter]')
+          .forEach(b => {
+            b.classList.toggle('lc-active',b === btn);
+          });
+
+        applyFilters();
+      });
+    });
+
+  search.addEventListener('input',applyFilters);
+
+  // تكبير الأداة عند استخدامها
+  grid.addEventListener('click',event => {
+    const button = event.target.closest('button');
+
+    if(!button || button.classList.contains('lc-close')){
+      return;
+    }
+
+    const card = button.closest('.tool');
+
+    if(card && card.parentElement === grid){
+      card.classList.add('lc-expanded');
+    }
+  });
+
+  applyFilters();
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener(
+    'DOMContentLoaded',
+    setupLucaraModern
+  );
+}else{
+  setupLucaraModern();
+}
+
+})();
+</script>
+
 </body>
 </html>
