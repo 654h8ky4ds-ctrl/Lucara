@@ -1,0 +1,761 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="أداة لوكارا لضغط ملفات PDF مجانًا">
+  <title>ضغط ملفات PDF | LUCARA</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0c0a16;
+      --surface: #171329;
+      --line: #37304e;
+      --lavender: #ba9cff;
+      --muted: #aaa5c2;
+      --gold: #e0bf83;
+      --white: #fffaff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Tahoma, Arial, sans-serif;
+      color: var(--white);
+      background: radial-gradient(
+        circle at 50% -10%,
+        #35204e 0,
+        #110d1e 48%,
+        var(--bg) 100%
+      );
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 19px 24px;
+      border-bottom: 1px solid #ffffff19;
+      background: #0e0b1a77;
+    }
+
+    .brand {
+      font-size: 23px;
+      letter-spacing: 3px;
+      font-weight: 900;
+      color: var(--gold);
+    }
+
+    header a {
+      color: #ded0ff;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .wrap {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 45px 17px 70px;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: clamp(27px, 6vw, 38px);
+      margin: 0 0 12px;
+    }
+
+    .intro {
+      color: var(--muted);
+      line-height: 2;
+      margin-bottom: 26px;
+      font-size: 15px;
+    }
+
+    .panel {
+      background: linear-gradient(145deg, #1d1730, #141120);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 26px;
+      box-shadow: 0 25px 65px #0005;
+    }
+
+    .drop {
+      display: block;
+      border: 2px dashed #765d9a;
+      background: #a78bfa0a;
+      border-radius: 18px;
+      padding: 31px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .drop:hover, .drop.drag {
+      border-color: var(--lavender);
+      background: #a78bfa1b;
+    }
+
+    .symbol {
+      font-size: 37px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .drop strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .drop small {
+      color: var(--muted);
+      line-height: 1.9;
+    }
+
+    #fileInput { display: none; }
+
+    .file-info {
+      background: #ffffff08;
+      border: 1px solid #ffffff18;
+      border-radius: 13px;
+      padding: 14px 16px;
+      margin-top: 16px;
+      display: none;
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 23px;
+    }
+
+    label.title {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    select {
+      min-width: 170px;
+      color: white;
+      background: #2c2542;
+      border: 1px solid #6c548f;
+      padding: 13px;
+      border-radius: 11px;
+      font: inherit;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+
+    button, .download {
+      font: inherit;
+      cursor: pointer;
+      border: 0;
+      border-radius: 12px;
+      padding: 14px 22px;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    #compressBtn {
+      background: linear-gradient(120deg, #9871eb, #b48bff);
+      color: #160e27;
+      flex: 1;
+    }
+
+    #compressBtn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .download {
+      background: #dabb80;
+      color: #21172d;
+      display: none;
+      flex: 1;
+    }
+
+    .status {
+      margin-top: 20px;
+      display: none;
+      padding: 15px;
+      border: 1px solid #78669480;
+      border-radius: 12px;
+      background: #ffffff08;
+      line-height: 1.9;
+    }
+
+    .status.success { border-color: #527c64; }
+    .status.warn { border-color: #b38c45; }
+    .status.error { border-color: #bb5b70; }
+
+    .progress-track {
+      height: 9px;
+      border-radius: 99px;
+      background: #372c4d;
+      overflow: hidden;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #825ce2, #dfbfff);
+      transition: width .25s;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #bbb5cd;
+      line-height: 2;
+      margin: 22px 0 0;
+    }
+
+    .bottom {
+      text-align: center;
+      font-size: 12px;
+      color: #8f89a5;
+      margin-top: 29px;
+    }
+
+    @media (max-width: 520px) {
+      .panel { padding: 17px; }
+      .row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      select { width: 100%; }
+      .actions { flex-direction: column; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <span class="brand">LUCARA</span>
+  <a href="./">العودة إلى لوكارا ←</a>
+</header>
+
+<main class="wrap">
+
+  <div class="eyebrow">أدوات لوكارا المجانية</div>
+
+  <h1>تقليل حجم ملف PDF</h1>
+
+  <p class="intro">
+    صغّر حجم ملفات PDF بخطوات بسيطة،
+    واختَر الحجم المناسب لرفع المستندات.
+    تتم معالجة الملفات داخل جهازك دون رفعها إلى خادم.
+  </p>
+
+  <section class="panel">
+
+    <label for="fileInput"
+           id="drop"
+           class="drop"
+           tabindex="0"
+           role="button">
+
+      <span class="symbol">📄</span>
+
+      <strong>اضغط لاختيار ملف PDF</strong>
+
+      <small>
+        أو اسحب الملف وأفلته هنا
+        <br>
+        حتى 30 ميغابايت · بحد أقصى 50 صفحة
+      </small>
+
+    </label>
+
+    <input
+      id="fileInput"
+      type="file"
+      accept="application/pdf,.pdf"
+    >
+
+    <div id="fileInfo" class="file-info"></div>
+
+    <div class="row">
+      <label for="targetSize" class="title">
+        الحجم المطلوب للملف
+      </label>
+
+      <select id="targetSize">
+        <option value="500">أقل من 500 KB</option>
+        <option value="1000">أقل من 1 MB</option>
+        <option value="2000">أقل من 2 MB</option>
+        <option value="5000">أقل من 5 MB</option>
+      </select>
+    </div>
+
+    <div class="actions">
+
+      <button id="compressBtn" type="button" disabled>
+        ابدأ ضغط PDF
+      </button>
+
+      <a id="downloadBtn" class="download" download>
+        تنزيل ملف PDF
+      </a>
+
+    </div>
+
+    <div id="status" class="status" role="status">
+      <span id="statusText"></span>
+
+      <div id="progressTrack" class="progress-track">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <p class="note">
+      تنبيه: قد يؤدي الضغط إلى تحويل صفحات PDF إلى صور،
+      مما يجعل النص غير قابل للبحث أو النسخ،
+      وقد يقل وضوحه. كما أن التوقيعات الرقمية
+      القابلة للتحقق لن تُحفظ.
+      لا يمكن ضمان الوصول للحجم المطلوب لجميع الملفات.
+    </p>
+
+  </section>
+
+  <p class="bottom">
+    LUCARA © أدوات عملية وآمنة لملفاتك
+  </p>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+
+<script>
+'use strict';
+
+const fileInput = document.getElementById('fileInput');
+const drop = document.getElementById('drop');
+const info = document.getElementById('fileInfo');
+const targetSelect = document.getElementById('targetSize');
+const compressBtn = document.getElementById('compressBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const statusBox = document.getElementById('status');
+const statusText = document.getElementById('statusText');
+const progressTrack = document.getElementById('progressTrack');
+const progressFill = document.getElementById('progressFill');
+
+const maxBytes = 30 * 1024 * 1024;
+
+let selectedFile = null;
+let outputUrl = null;
+
+function readable(bytes) {
+  return bytes < 1024 * 1024
+    ? (bytes / 1024).toFixed(1) + ' KB'
+    : (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+function clearDownload() {
+  downloadBtn.style.display = 'none';
+  downloadBtn.removeAttribute('href');
+
+  if (outputUrl) {
+    URL.revokeObjectURL(outputUrl);
+  }
+
+  outputUrl = null;
+}
+
+function message(text, kind = '', percent = null) {
+  statusBox.className = 'status' + (kind ? ' ' + kind : '');
+  statusBox.style.display = 'block';
+  statusText.textContent = text;
+
+  progressTrack.style.display =
+    percent === null ? 'none' : 'block';
+
+  if (percent !== null) {
+    progressFill.style.width =
+      Math.max(0, Math.min(100, percent)) + '%';
+  }
+}
+
+function choose(file) {
+  clearDownload();
+  statusBox.style.display = 'none';
+  selectedFile = null;
+  compressBtn.disabled = true;
+
+  if (!file) {
+    info.style.display = 'none';
+    return;
+  }
+
+  if (!(file.type === 'application/pdf' ||
+        /\.pdf$/i.test(file.name))) {
+    message('اختَر ملف PDF فقط.', 'error');
+    return;
+  }
+
+  if (file.size > maxBytes) {
+    message(
+      'حجم الملف أكبر من 30 ميغابايت.',
+      'error'
+    );
+    return;
+  }
+
+  selectedFile = file;
+  info.style.display = 'block';
+
+  info.textContent =
+    'الملف: ' + file.name +
+    ' | الحجم الأصلي: ' + readable(file.size);
+
+  compressBtn.disabled = false;
+}
+
+fileInput.addEventListener('change', () => {
+  choose(fileInput.files[0]);
+});
+
+drop.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    fileInput.click();
+  }
+});
+
+['dragenter', 'dragover'].forEach(type => {
+  drop.addEventListener(type, e => {
+    e.preventDefault();
+    drop.classList.add('drag');
+  });
+});
+
+['dragleave', 'drop'].forEach(type => {
+  drop.addEventListener(type, e => {
+    e.preventDefault();
+    drop.classList.remove('drag');
+  });
+});
+
+drop.addEventListener('drop', e => {
+  if (e.dataTransfer.files.length) {
+    choose(e.dataTransfer.files[0]);
+  }
+});
+
+targetSelect.addEventListener('change', () => {
+  clearDownload();
+  statusBox.style.display = 'none';
+});
+
+function offer(blob, name) {
+  clearDownload();
+
+  outputUrl = URL.createObjectURL(blob);
+
+  downloadBtn.href = outputUrl;
+
+  downloadBtn.download =
+    name.replace(/\.pdf$/i, '') +
+    '-lucara-compressed.pdf';
+
+  downloadBtn.style.display = 'block';
+}
+
+async function buildCompressedPDF(
+  pdf,
+  dpi,
+  quality,
+  onProgress
+) {
+  const { jsPDF } = window.jspdf;
+
+  let doc;
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+
+    const page = await pdf.getPage(i);
+
+    const original = page.getViewport({ scale: 1 });
+
+    const viewport = page.getViewport({
+      scale: dpi / 72
+    });
+
+    const canvas = document.createElement('canvas');
+
+    canvas.width = Math.round(viewport.width);
+    canvas.height = Math.round(viewport.height);
+
+    const ctx = canvas.getContext('2d', {
+      alpha: false
+    });
+
+    if (!ctx) {
+      throw new Error('المتصفح لا يدعم معالجة الصور.');
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(
+      0, 0,
+      canvas.width,
+      canvas.height
+    );
+
+    try {
+
+      await page.render({
+        canvasContext: ctx,
+        viewport,
+        background: '#ffffff'
+      }).promise;
+
+      const jpeg = canvas.toDataURL(
+        'image/jpeg',
+        quality
+      );
+
+      const w = original.width;
+      const h = original.height;
+
+      const orientation =
+        w > h ? 'landscape' : 'portrait';
+
+      if (!doc) {
+        doc = new jsPDF({
+          unit: 'pt',
+          format: [w, h],
+          orientation,
+          compress: true,
+          precision: 3
+        });
+      } else {
+        doc.addPage([w, h], orientation);
+      }
+
+      doc.addImage(
+        jpeg,
+        'JPEG',
+        0, 0,
+        w, h,
+        undefined,
+        'FAST'
+      );
+
+    } finally {
+      canvas.width = 0;
+      canvas.height = 0;
+      page.cleanup();
+    }
+
+    onProgress(i / pdf.numPages);
+
+    await new Promise(resolve => {
+      setTimeout(resolve, 0);
+    });
+  }
+
+  return doc.output('blob');
+}
+
+compressBtn.addEventListener('click', async () => {
+
+  if (!selectedFile) return;
+
+  clearDownload();
+
+  const file = selectedFile;
+
+  const targetBytes =
+    Number(targetSelect.value) * 1000;
+
+  if (file.size < targetBytes) {
+    offer(file, file.name);
+
+    message(
+      'الملف أصلاً أصغر من الحجم المطلوب (' +
+      readable(file.size) +
+      '). يمكنك تنزيله كما هو دون فقدان الجودة.',
+      'success'
+    );
+
+    return;
+  }
+
+  if (!window.pdfjsLib || !window.jspdf) {
+    message(
+      'تعذّر تحميل مكتبات PDF. تحقق من اتصال الإنترنت وحدّث الصفحة.',
+      'error'
+    );
+    return;
+  }
+
+  compressBtn.disabled = true;
+  targetSelect.disabled = true;
+  fileInput.disabled = true;
+
+  let pdf;
+
+  try {
+
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    message('جارٍ قراءة الملف...', '', 2);
+
+    pdf = await window.pdfjsLib.getDocument({
+      data: new Uint8Array(await file.arrayBuffer())
+    }).promise;
+
+    if (pdf.numPages > 50) {
+      throw new Error(
+        'الحد الأقصى 50 صفحة لكل عملية ضغط.'
+      );
+    }
+
+    const options = [
+      { dpi: 140, quality: .77 },
+      { dpi: 115, quality: .68 },
+      { dpi: 95, quality: .59 },
+      { dpi: 80, quality: .48 },
+      { dpi: 68, quality: .39 },
+      { dpi: 56, quality: .32 }
+    ];
+
+    let best = null;
+
+    for (
+      let attempt = 0;
+      attempt < options.length;
+      attempt++
+    ) {
+
+      const opt = options[attempt];
+
+      const blob = await buildCompressedPDF(
+        pdf,
+        opt.dpi,
+        opt.quality,
+        ratio => {
+
+          const percent = Math.round(
+            ((attempt + ratio) / options.length) * 100
+          );
+
+          message(
+            'جارٍ ضغط الملف: المحاولة ' +
+            (attempt + 1) +
+            ' من ' + options.length +
+            ' · ' +
+            Math.round(ratio * 100) +
+            '% من الصفحات',
+            '',
+            percent
+          );
+
+        }
+      );
+
+      if (!best || blob.size < best.size) {
+        best = blob;
+      }
+
+      if (blob.size < targetBytes) {
+        break;
+      }
+    }
+
+    if (!best || best.size >= file.size) {
+      message(
+        'تعذّر تقليل حجم الملف بهذا الأسلوب. الملف الأصلي لم يتغيّر.',
+        'warn'
+      );
+      return;
+    }
+
+    offer(best, file.name);
+
+    const saving = Math.round(
+      100 * (1 - best.size / file.size)
+    );
+
+    if (best.size < targetBytes) {
+
+      message(
+        'تم الضغط بنجاح! الحجم قبل: ' +
+        readable(file.size) +
+        ' · بعد: ' +
+        readable(best.size) +
+        ' · التوفير: ' +
+        saving + '%.',
+        'success'
+      );
+
+    } else {
+
+      message(
+        'تم تقليل الحجم إلى ' +
+        readable(best.size) +
+        ' (توفير ' + saving +
+        '%)، لكن لم نصل إلى الحجم المطلوب. يمكنك تنزيل أفضل نتيجة.',
+        'warn'
+      );
+
+    }
+
+  } catch (err) {
+
+    console.error('LUCARA PDF compressor:', err);
+
+    const password =
+      /PasswordException|password/i.test(err?.name || '') ||
+      /password/i.test(err?.message || '');
+
+    message(
+      password
+        ? 'الملف محمي بكلمة مرور. أزل الحماية ثم حاول مجددًا.'
+        : 'لم نتمكن من ضغط الملف: ' +
+          (err?.message || 'خطأ غير معروف'),
+      'error'
+    );
+
+  } finally {
+
+    if (pdf) {
+      await pdf.destroy();
+    }
+
+    compressBtn.disabled = false;
+    targetSelect.disabled = false;
+    fileInput.disabled = false;
+
+  }
+
+});
+</script>
+
+</body>
+</html>
