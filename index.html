@@ -3179,5 +3179,22 @@ body.lucara-member-active #lucaraAccessNotice {
 })();
 </script>
 
+<!-- LUCARA PREMIUM - قفل الواجهة -->
+<style>
+body:not(.lucara-member-active) section.tools,
+body:not(.lucara-member-active) #videoToMp3Tool,
+body:not(.lucara-member-active) #removeMusicTool {
+  pointer-events: none !important;
+  user-select: none !important;
+  opacity: 0.45 !important;
+}
+
+body:not(.lucara-member-active) section.tools button,
+body:not(.lucara-member-active) section.tools input,
+body:not(.lucara-member-active) section.tools select {
+  pointer-events: none !important;
+}
+</style>
+
 </body>
 </html>
