@@ -1098,25 +1098,21 @@ function showQRTool() {
   document.getElementById("qrTool").style.display = "block";
 }
 
-function generateQR() {
+
+async function generateQR() {
   const type = document.getElementById("qrType").value;
   const text = document.getElementById("qrText").value.trim();
   const result = document.getElementById("qrResult");
 
   if (!text) {
-    alert("اكتبي البيانات أولاً");
+    alert("يرجى إدخال البيانات أولاً");
     return;
   }
 
   let qrData = text;
 
-  if (type === "location") {
-    qrData = text;
-  }
-
   if (type === "whatsapp") {
-    const number = text.replace(/\D/g, "");
-    qrData = "https://wa.me/" + number;
+    qrData = "https://wa.me/" + text.replace(/\D/g, "");
   }
 
   if (type === "phone") {
@@ -1124,23 +1120,73 @@ function generateQR() {
   }
 
   if (type === "wifi") {
-  const password = document.getElementById("wifiPassword").value;
-  qrData = "WIFI:T:WPA;S:" + text + ";P:" + password + ";;";
+    const password = document.getElementById("wifiPassword").value;
+    const esc = s => s.replace(/([\\;,:"'])/g, "\\$1");
+    qrData = "WIFI:T:WPA;S:" + esc(text) +
+             ";P:" + esc(password) + ";;";
+  }
+
+  result.textContent = "⏳ جاري إنشاء رمز QR...";
+
+  try {
+    const premium = window.supabase.createClient(
+      "https://zzxnxukonjppwlfpmlrs.supabase.co",
+      "sb_publishable_2JnyhWumzzJpWag92DGMQA_PGqf72U9"
+    );
+
+    const { data: authData } =
+      await premium.auth.getSession();
+
+    if (!authData.session) {
+      result.textContent = "🔒 يرجى تسجيل الدخول أولاً";
+      return;
+    }
+
+    const { data, error } =
+      await premium.functions.invoke("lucara-tools", {
+        body: {
+          action: "qr",
+          text: qrData
+        }
+      });
+
+    if (error) {
+      let reason = "تعذر إنشاء QR أو التحقق من الاشتراك";
+
+      try {
+        const details = await error.context.json();
+        reason = details.error || reason;
+      } catch (_) {}
+
+      throw new Error(reason);
+    }
+
+    if (!data || typeof data.svg !== "string") {
+      throw new Error("لم يتم استلام رمز QR");
+    }
+
+    const blob = new Blob([data.svg], {
+      type: "image/svg+xml"
+    });
+
+    const url = URL.createObjectURL(blob);
+    const img = document.createElement("img");
+
+    img.src = url;
+    img.alt = "رمز QR";
+    img.style.width = "250px";
+    img.style.maxWidth = "100%";
+
+    img.onload = () => URL.revokeObjectURL(url);
+
+    result.replaceChildren(img);
+
+  } catch (error) {
+    console.error(error);
+    result.textContent = "❌ " + error.message;
+  }
 }
 
-  result.innerHTML = "";
-
-  const img = document.createElement("img");
-  img.src =
-    "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" +
-    encodeURIComponent(qrData);
-
-  img.style.maxWidth = "250px";
-  img.style.width = "100%";
-  img.style.borderRadius = "10px";
-
-  result.appendChild(img);
-} 
  function changeQRType() {
   const type = document.getElementById("qrType").value;
   const input = document.getElementById("qrText");
