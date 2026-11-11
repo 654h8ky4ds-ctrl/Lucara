@@ -251,6 +251,49 @@
   </style>
 </head>
 
+<style>
+  html:not(.lucara-authorized) body {
+    display: none !important;
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<script>
+(async function () {
+  try {
+    const client = window.supabase.createClient(
+      "https://zzxnxukonjppwlfpmlrs.supabase.co",
+      "sb_publishable_2JnyhWumzzJpWag92DGMQA_PGqf72U9"
+    );
+
+    const { data: userData, error: userError } =
+      await client.auth.getUser();
+
+    if (userError || !userData.user) {
+      window.location.replace("account.html");
+      return;
+    }
+
+    const { data: allowed, error } =
+      await client.rpc("lucara_can_use_tools");
+
+    if (error || allowed !== true) {
+      window.location.replace("account.html");
+      return;
+    }
+
+    document.documentElement.classList.add(
+      "lucara-authorized"
+    );
+
+  } catch (error) {
+    console.error(error);
+    window.location.replace("account.html");
+  }
+})();
+</script>
+
 <body>
 
 <header>
