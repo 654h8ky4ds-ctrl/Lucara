@@ -3050,5 +3050,134 @@ if(document.readyState === 'loading'){
 })();
 </script>
 
+<!-- LUCARA PREMIUM - فحص الاشتراك -->
+
+<style>
+body:not(.lucara-member-active) .tools > .tool,
+body:not(.lucara-member-active) #videoToMp3Tool,
+body:not(.lucara-member-active) #removeMusicTool {
+  pointer-events: none !important;
+  opacity: .5;
+  filter: grayscale(.35);
+}
+
+#lucaraAccessNotice {
+  background: #241536;
+  color: white;
+  border: 1px solid #9871eb;
+  border-radius: 18px;
+  padding: 25px 18px;
+  margin: 20px 0;
+  text-align: center;
+  line-height: 1.9;
+}
+
+#lucaraAccessNotice h3 {
+  color: #e7c48b;
+  font-size: 21px;
+  margin: 0 0 10px;
+}
+
+#lucaraAccessNotice p {
+  color: #e5d9f1;
+}
+
+#lucaraAccessNotice a {
+  display: inline-block;
+  background: #9871eb;
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+body.lucara-member-active #lucaraAccessNotice {
+  display: none;
+}
+</style>
+
+<script>
+(async function () {
+
+  const tools = document.querySelector(".tools");
+
+  if (!tools) return;
+
+  const notice = document.createElement("div");
+  notice.id = "lucaraAccessNotice";
+
+  notice.innerHTML = `
+    <h3>👑 LUCARA PREMIUM</h3>
+    <p id="lucaraAccessText">
+      جاري التحقق من الاشتراك...
+    </p>
+    <a href="account.html">
+      تسجيل الدخول / الاشتراك
+    </a>
+  `;
+
+  tools.before(notice);
+
+  const statusText =
+    document.getElementById("lucaraAccessText");
+
+  function setStatus(message) {
+    statusText.textContent = message;
+  }
+
+  try {
+
+    if (!window.supabase) {
+      throw new Error("تعذر تحميل خدمة تسجيل الدخول");
+    }
+
+    const premium = window.supabase.createClient(
+      "https://zzxnxukonjppwlfpmlrs.supabase.co",
+      "sb_publishable_2JnyhWumzzJpWag92DGMQA_PGqf72U9"
+    );
+
+    const { data: userData, error: userError } =
+      await premium.auth.getUser();
+
+    if (userError || !userData.user) {
+      setStatus(
+        "يرجى تسجيل الدخول والاشتراك للاستفادة من أدوات لوكارا."
+      );
+      return;
+    }
+
+    const { data: allowed, error: accessError } =
+      await premium.rpc("lucara_can_use_tools");
+
+    if (accessError) {
+      throw accessError;
+    }
+
+    if (allowed === true) {
+      document.body.classList.add(
+        "lucara-member-active"
+      );
+    } else {
+      setStatus(
+        "حسابك مسجل، لكن لا يوجد اشتراك نشط. " +
+        "اشترك بـ9 ريالات لمدة 30 يومًا."
+      );
+    }
+
+  } catch (error) {
+
+    console.error("LUCARA access:", error);
+
+    setStatus(
+      "تعذر التحقق من الاشتراك. " +
+      "يرجى المحاولة مرة أخرى."
+    );
+
+  }
+
+})();
+</script>
+
 </body>
 </html>
