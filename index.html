@@ -216,6 +216,200 @@ footer{
 
 
 <section class="tools">
+  
+<!-- LUCARA | Remove Image Background -->
+<div class="tool" id="lucaraBgRemove">
+
+  <div class="badge">جديد</div>
+  <div class="icon">🪄</div>
+
+  <h3>إزالة خلفية الصور بالذكاء الاصطناعي</h3>
+
+  <p>
+    احذف خلفية صورتك تلقائيًا، وحمّل النتيجة
+    بصيغة PNG بخلفية شفافة.
+  </p>
+
+  <input
+    id="lucaraBgFile"
+    type="file"
+    accept="image/jpeg,image/png,image/webp"
+    style="width:100%;margin:12px 0;"
+  >
+
+  <button type="button" id="lucaraBgStart"
+          style="width:100%;">
+    ✨ إزالة الخلفية
+  </button>
+
+  <p id="lucaraBgStatus"
+     role="status"
+     aria-live="polite"
+     style="min-height:0;margin:12px 0;color:#6d28d9;">
+    اختر صورة للبدء
+  </p>
+
+  <div id="lucaraBgResult" hidden
+       style="margin-top:15px;">
+
+    <div style="
+      background:repeating-conic-gradient(
+        #e5e5e5 0% 25%,
+        #ffffff 0% 50%
+      ) 0 0/20px 20px;
+      border-radius:12px;
+      padding:12px;
+      text-align:center;
+    ">
+      <img id="lucaraBgPreview"
+           alt="الصورة بعد إزالة الخلفية"
+           style="max-width:100%;max-height:350px;">
+    </div>
+
+    <a id="lucaraBgDownload"
+       style="
+         display:block;
+         margin-top:14px;
+         padding:13px;
+         border-radius:12px;
+         background:#6d28d9;
+         color:white;
+         text-decoration:none;
+         font-weight:bold;
+       ">
+      ⬇ تحميل الصورة PNG
+    </a>
+
+  </div>
+
+  <small style="display:block;margin-top:12px;color:#777;">
+    تتم معالجة الصورة داخل المتصفح.
+    أول استخدام يتطلب تحميل نموذج الذكاء الاصطناعي.
+  </small>
+
+</div>
+
+<script type="module">
+(() => {
+
+  const fileInput =
+    document.getElementById("lucaraBgFile");
+  const start =
+    document.getElementById("lucaraBgStart");
+  const status =
+    document.getElementById("lucaraBgStatus");
+  const result =
+    document.getElementById("lucaraBgResult");
+  const preview =
+    document.getElementById("lucaraBgPreview");
+  const download =
+    document.getElementById("lucaraBgDownload");
+
+  let resultUrl = null;
+
+  fileInput.addEventListener("change", () => {
+    result.hidden = true;
+    status.textContent = fileInput.files[0]
+      ? "الصورة جاهزة لإزالة الخلفية."
+      : "اختر صورة للبدء";
+  });
+
+  start.addEventListener("click", async () => {
+
+    if (!document.body.classList.contains(
+      "lucara-member-active"
+    )) {
+      status.textContent =
+        "🔒 هذه الأداة متاحة للمشتركين فقط.";
+      return;
+    }
+
+    const file = fileInput.files[0];
+
+    if (!file) {
+      status.textContent = "اختر صورة أولًا.";
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp"]
+          .includes(file.type)) {
+      status.textContent =
+        "اختر صورة بصيغة JPG أو PNG أو WebP.";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      status.textContent =
+        "حجم الصورة يجب ألا يتجاوز 10MB.";
+      return;
+    }
+
+    start.disabled = true;
+    result.hidden = true;
+
+    try {
+      status.textContent =
+        "⏳ جارٍ تجهيز الذكاء الاصطناعي...";
+
+      const library = await import(
+        "https://esm.sh/@imgly/background-removal@1.7.0"
+      );
+
+      const removeBackground =
+        library.removeBackground || library.default;
+
+      if (typeof removeBackground !== "function") {
+        throw new Error("تعذر تشغيل المكتبة");
+      }
+
+      status.textContent =
+        "⏳ جارٍ إزالة الخلفية...";
+
+      const pngBlob = await removeBackground(file, {
+        proxyToWorker: false,
+        progress: (key, current, total) => {
+          if (total > 0) {
+            const percent =
+              Math.round((current / total) * 100);
+
+            status.textContent =
+              "⏳ تحميل النموذج: " + percent + "%";
+          }
+        }
+      });
+
+      if (resultUrl) {
+        URL.revokeObjectURL(resultUrl);
+      }
+
+      resultUrl = URL.createObjectURL(pngBlob);
+
+      preview.src = resultUrl;
+      download.href = resultUrl;
+
+      const name = file.name.replace(/\.[^.]+$/, "");
+      download.download = name + "-LUCARA.png";
+
+      result.hidden = false;
+
+      status.textContent =
+        "✅ تمت إزالة الخلفية. الصورة جاهزة للتحميل.";
+
+    } catch (error) {
+      console.error("LUCARA Background Removal:", error);
+
+      status.textContent =
+        "❌ تعذرت إزالة الخلفية. " +
+        "جرّب صورة أصغر أو متصفحًا آخر.";
+    } finally {
+      start.disabled = false;
+    }
+
+  });
+
+})();
+</script>
+
 
 <!-- LUCARA: استخراج النص من الصورة -->
 <div class="tool" id="lucaraOcrTool">
