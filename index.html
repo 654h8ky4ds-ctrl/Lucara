@@ -217,6 +217,193 @@ footer{
 
 <section class="tools">
 
+<!-- LUCARA: استخراج النص من الصورة -->
+<div class="tool" id="lucaraOcrTool">
+  <div class="badge">جديد</div>
+  <div class="icon">🔎</div>
+
+  <h3>استخراج النص من الصورة</h3>
+  <p>حوّل الكتابة الموجودة في الصور إلى نص قابل للنسخ، بالعربية أو الإنجليزية.</p>
+
+  <input
+    id="lucaraOcrFile"
+    type="file"
+    accept="image/jpeg,image/png,image/webp"
+    style="display:block;width:100%;max-width:100%;margin:12px 0;"
+  >
+
+  <label for="lucaraOcrLang"
+         style="display:block;margin:8px 0 5px;">
+    لغة النص
+  </label>
+
+  <select id="lucaraOcrLang"
+          style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;">
+    <option value="both">العربية + الإنجليزية</option>
+    <option value="ara">العربية فقط</option>
+    <option value="eng">الإنجليزية فقط</option>
+  </select>
+
+  <button type="button" id="lucaraOcrStart">
+    🔎 استخراج النص
+  </button>
+
+  <div id="lucaraOcrStatus"
+       role="status"
+       aria-live="polite"
+       style="margin:12px 0;color:#6d28d9;font-size:13px;">
+  </div>
+
+  <textarea
+    id="lucaraOcrOutput"
+    readonly
+    dir="auto"
+    placeholder="سيظهر النص المستخرج هنا..."
+    style="width:100%;height:190px;resize:vertical;padding:12px;border:1px solid #ddd;border-radius:12px;font-size:15px;line-height:1.8;"
+  ></textarea>
+
+  <div>
+    <button type="button" id="lucaraOcrCopy">
+      📋 نسخ النص
+    </button>
+    <button type="button" id="lucaraOcrDownload">
+      ⬇ تنزيل TXT
+    </button>
+  </div>
+
+  <p style="min-height:0;font-size:12px;color:#777;">
+    تعمل المعالجة داخل المتصفح. يدعم JPG وPNG وWebP؛
+    راجع النص قبل استخدامه لأن الدقة تختلف حسب وضوح الصورة.
+  </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+
+<script>
+(function () {
+  const fileInput = document.getElementById('lucaraOcrFile');
+  const start = document.getElementById('lucaraOcrStart');
+  const output = document.getElementById('lucaraOcrOutput');
+  const status = document.getElementById('lucaraOcrStatus');
+  const lang = document.getElementById('lucaraOcrLang');
+  const copy = document.getElementById('lucaraOcrCopy');
+  const download = document.getElementById('lucaraOcrDownload');
+
+  fileInput.addEventListener('change', () => {
+    output.value = '';
+    status.textContent = fileInput.files[0]
+      ? '✅ تم اختيار الصورة: ' + fileInput.files[0].name
+      : '';
+  });
+
+  start.addEventListener('click', async () => {
+    if (!document.body.classList.contains('lucara-member-active')) {
+      status.textContent = 'هذه الأداة تتطلب اشتراك لوكارا نشطًا.';
+      return;
+    }
+
+    const file = fileInput.files[0];
+
+    if (!file) {
+      status.textContent = 'اختَر صورة أولًا.';
+      return;
+    }
+
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+      status.textContent = 'استخدم صورة JPG أو PNG أو WebP.';
+      return;
+    }
+
+    if (file.size > 12 * 1024 * 1024) {
+      status.textContent = 'حجم الصورة كبير. اختر صورة أصغر من 12 ميجابايت.';
+      return;
+    }
+
+    if (!window.Tesseract) {
+      status.textContent = 'تعذر تحميل محرك قراءة الصور. تحقق من الإنترنت ثم حدّث الصفحة.';
+      return;
+    }
+
+    start.disabled = true;
+    output.value = '';
+    status.textContent = 'جارٍ تحميل بيانات اللغة...';
+
+    let worker;
+
+    try {
+      const languages = lang.value === 'both'
+        ? ['ara', 'eng']
+        : lang.value;
+
+      worker = await Tesseract.createWorker(languages, 1, {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            const percentage = Math.round((m.progress || 0) * 100);
+            status.textContent = 'جارٍ استخراج النص: ' + percentage + '%';
+          }
+        }
+      });
+
+      const result = await worker.recognize(file);
+
+      output.value = (result.data.text || '').trim();
+
+      status.textContent = output.value
+        ? '✅ اكتمل استخراج النص، ويمكنك تعديله بعد نسخه.'
+        : 'لم يتم اكتشاف نص واضح. جرّب صورة أوضح.';
+
+    } catch (error) {
+      console.error('LUCARA OCR:', error);
+      status.textContent = 'تعذر استخراج النص. تحقق من اتصال الإنترنت وجرب صورة أخرى.';
+
+    } finally {
+      if (worker) {
+        await worker.terminate().catch(() => {});
+      }
+      start.disabled = false;
+    }
+  });
+
+  copy.addEventListener('click', async () => {
+    if (!output.value) {
+      status.textContent = 'ما فيه نص لنسخه حتى الآن.';
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(output.value);
+      status.textContent = '✅ تم نسخ النص.';
+    } catch {
+      output.focus();
+      output.select();
+      status.textContent = 'حدد النص واضغط نسخ من قائمة الجهاز.';
+    }
+  });
+
+  download.addEventListener('click', () => {
+    if (!output.value) {
+      status.textContent = 'ما فيه نص لتنزيله حتى الآن.';
+      return;
+    }
+
+    const blob = new Blob(['\uFEFF', output.value], {
+      type: 'text/plain;charset=utf-8'
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = 'LUCARA-image-text.txt';
+    link.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+
+    status.textContent = '✅ تم تجهيز الملف النصي.';
+  });
+})();
+</script>
+
 
 <div class="tool">
 
