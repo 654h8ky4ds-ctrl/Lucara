@@ -412,7 +412,7 @@ footer{
 
 
 <!-- LUCARA: استخراج النص من الصورة -->
-<div class="tool" id="lucaraOcrTool">
+<div class="tool lucara-trial-tool" id="lucaraOcrTool">
   <div class="badge">جديد</div>
   <div class="icon">🔎</div>
 
@@ -491,10 +491,20 @@ footer{
   });
 
   start.addEventListener('click', async () => {
-    if (!document.body.classList.contains('lucara-member-active')) {
-      status.textContent = 'هذه الأداة تتطلب اشتراك لوكارا نشطًا.';
-      return;
-    }
+    
+const isPremium = document.body.classList.contains(
+  "lucara-member-active"
+);
+
+if (
+  !isPremium &&
+  !document.body.classList.contains("lucara-trial-available")
+) {
+  status.textContent =
+    "🔒 يرجى تسجيل الدخول أو الاشتراك لاستخدام الأداة.";
+  return;
+}
+
 
     const file = fileInput.files[0];
 
@@ -540,7 +550,37 @@ footer{
 
       const result = await worker.recognize(file);
 
-      output.value = (result.data.text || '').trim();
+
+const recognizedText = (result.data.text || "").trim();
+
+if (recognizedText && !isPremium) {
+  if (typeof window.lucaraCheckTrial !== "function") {
+    throw new Error("نظام التجربة غير متاح");
+  }
+
+  const permitted = await window.lucaraCheckTrial();
+
+  if (!permitted) {
+    status.textContent =
+      "🔒 انتهت التجربة المجانية. يرجى الاشتراك.";
+    return;
+  }
+
+  document.getElementById("lucaraOcrTool")
+    .classList.add("lucara-trial-result");
+
+  const accessText = document.getElementById(
+    "lucaraAccessText"
+  );
+
+  if (accessText) {
+    accessText.textContent =
+      "✅ تم استخدام تجربتك المجانية. اشترك لمواصلة استخدام الأدوات.";
+  }
+}
+
+output.value = recognizedText;
+
 
       status.textContent = output.value
         ? '✅ اكتمل استخراج النص، ويمكنك تعديله بعد نسخه.'
