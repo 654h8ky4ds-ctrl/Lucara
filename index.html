@@ -3643,5 +3643,53 @@ body:not(.lucara-member-active) section.tools select {
 }
 </style>
 
+<script>
+window.lucaraCheckTrial = async function () {
+
+  // المشترك النشط يستخدم الأدوات دون خصم تجربة
+  if (document.body.classList.contains(
+    "lucara-member-active"
+  )) {
+    return true;
+  }
+
+  const premium = window.supabase.createClient(
+    "https://zzxnxukonjppwlfpmlrs.supabase.co",
+    "sb_publishable_2JnyhWumzzJpWag92DGMQA_PGqf72U9"
+  );
+
+  const { data: authData, error: authError } =
+    await premium.auth.getUser();
+
+  if (authError || !authData.user) {
+    alert("يرجى تسجيل الدخول أولًا");
+    window.location.href = "account.html";
+    return false;
+  }
+
+  const { data: accepted, error } =
+    await premium.rpc("lucara_claim_trial");
+
+  if (error) {
+    console.error(error);
+    alert("تعذر التحقق من التجربة المجانية");
+    return false;
+  }
+
+  if (accepted !== true) {
+    alert(
+      "🔒 انتهت تجربتك المجانية. اشترك لمواصلة استخدام أدوات لوكارا."
+    );
+    return false;
+  }
+
+  document.body.classList.remove(
+    "lucara-trial-available"
+  );
+
+  return true;
+};
+</script>
+
 </body>
 </html>
