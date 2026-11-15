@@ -3691,5 +3691,105 @@ window.lucaraCheckTrial = async function () {
 };
 </script>
 
+<style>
+/* السماح بالتجربة للأدوات المحددة فقط */
+body.lucara-trial-available section.tools {
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  user-select: auto !important;
+}
+
+body.lucara-trial-available section.tools > .tool {
+  pointer-events: none !important;
+  opacity: .45 !important;
+}
+
+body.lucara-trial-available section.tools > .tool.lucara-trial-tool {
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+body.lucara-trial-available section.tools .lucara-trial-tool button,
+body.lucara-trial-available section.tools .lucara-trial-tool input,
+body.lucara-trial-available section.tools .lucara-trial-tool select,
+body.lucara-trial-available section.tools .lucara-trial-tool textarea {
+  pointer-events: auto !important;
+}
+</style>
+
+<script>
+(function () {
+  const trialTools = [
+    ["compressImage", "compressImageInput"],
+    ["convertImage", "convertImageInput"],
+    ["createPDF", "pdfImagesInput"],
+    ["convertToGif", "videoInput"],
+    ["createFileLink", "linkFileInput"],
+    ["printCV", "cvBuilder"]
+  ];
+
+  trialTools.forEach(([functionName, elementId]) => {
+    const element = document.getElementById(elementId);
+    const card = element?.closest(".tool");
+
+    if (card) {
+      card.classList.add("lucara-trial-tool");
+    }
+
+    const original = window[functionName];
+
+    if (typeof original !== "function") return;
+
+    window[functionName] = async function (...args) {
+      if (document.body.classList.contains(
+        "lucara-member-active"
+      )) {
+        return original.apply(this, args);
+      }
+
+      if (!document.body.classList.contains(
+        "lucara-trial-available"
+      )) {
+        alert("🔒 يرجى الاشتراك لاستخدام هذه الأداة.");
+        return;
+      }
+
+      const valid = functionName === "printCV"
+        ? !!document.getElementById("lucaraCV")
+        : !!(
+            functionName === "createFileLink"
+              ? args[0]?.files?.length
+              : element?.files?.length
+          );
+
+      if (!valid) {
+        return original.apply(this, args);
+      }
+
+      if (typeof window.lucaraCheckTrial !== "function") {
+        alert("تعذر تشغيل نظام التجربة.");
+        return;
+      }
+
+      const permitted = await window.lucaraCheckTrial();
+
+      if (!permitted) return;
+
+      const notice =
+        document.getElementById("lucaraAccessText");
+
+      if (notice) {
+        notice.textContent =
+          "✅ تم استخدام تجربتك المجانية. " +
+          "اشترك لمواصلة استخدام الأدوات.";
+      }
+
+      return original.apply(this, args);
+    };
+  });
+})();
+</script>
+
 </body>
 </html>
