@@ -3581,16 +3581,36 @@ body.lucara-member-active #lucaraAccessNotice {
       throw accessError;
     }
 
-    if (allowed === true) {
-      document.body.classList.add(
-        "lucara-member-active"
-      );
-    } else {
-      setStatus(
-        "حسابك مسجل، لكن لا يوجد اشتراك نشط. " +
-        "اشترك بـ9 ريالات لمدة 30 يومًا."
-      );
-    }
+  
+if (allowed === true) {
+  document.body.classList.add(
+    "lucara-member-active"
+  );
+} else {
+  const { data: trialAvailable, error: trialError } =
+    await premium.rpc("lucara_trial_available");
+
+  if (trialError) {
+    throw trialError;
+  }
+
+  if (trialAvailable === true) {
+    document.body.classList.add(
+      "lucara-trial-available"
+    );
+
+    setStatus(
+      "🎁 لديك تجربة مجانية واحدة! " +
+      "سيتم تفعيل استخدامها في أدوات لوكارا."
+    );
+  } else {
+    setStatus(
+      "🔒 انتهت تجربتك المجانية. " +
+      "اشترك للاستفادة من أدوات لوكارا."
+    );
+  }
+}
+
 
   } catch (error) {
 
