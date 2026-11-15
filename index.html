@@ -3791,5 +3791,31 @@ card?.classList.add("lucara-trial-result");
 })();
 </script>
 
+<style>
+/* إبقاء الأداة المستخدمة متاحة لتحميل النتيجة */
+body:not(.lucara-member-active) section.tools {
+  pointer-events: auto !important;
+  opacity: 1 !important;
+}
+
+body:not(.lucara-member-active)
+section.tools > .tool.lucara-trial-result {
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+body:not(.lucara-member-active)
+section.tools > .tool.lucara-trial-result button,
+body:not(.lucara-member-active)
+section.tools > .tool.lucara-trial-result a,
+body:not(.lucara-member-active)
+section.tools > .tool.lucara-trial-result input,
+body:not(.lucara-member-active)
+section.tools > .tool.lucara-trial-result select {
+  pointer-events: auto !important;
+}
+</style>
+
 </body>
 </html>
