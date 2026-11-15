@@ -3775,7 +3775,7 @@ body.lucara-trial-available section.tools .lucara-trial-tool textarea {
       const permitted = await window.lucaraCheckTrial();
 
       if (!permitted) return;
-
+card?.classList.add("lucara-trial-result");
       const notice =
         document.getElementById("lucaraAccessText");
 
